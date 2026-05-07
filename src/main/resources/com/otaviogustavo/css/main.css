@@ -1,0 +1,51 @@
+.label-title {
+    -fx-text-fill: white;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+.button-player {
+    -fx-background-color: transparent;
+    -fx-background-radius: 50;
+    -fx-min-width: 40px;
+    -fx-min-height: 40px;
+    -fx-max-width: 40px;
+    -fx-max-height: 40px;
+    -fx-text-fill: white;
+}
+
+.button-player:hover {
+    -fx-background-color: #3e3e3e;
+}
+
+.button-player .ikonli-font-icon {
+    -fx-icon-color: white;
+}
+
+.button-menu {
+    -fx-background-color: transparent;
+    -fx-text-fill: #b3b3b3;
+    -fx-padding: 10 15 10 15;
+    -fx-cursor: hand;
+    -fx-font-size: 14px;
+    -fx-graphic-text-gap: 15px;
+}
+
+.button-menu:hover {
+    -fx-background-color: #282828;
+    -fx-text-fill: white;
+}
+
+.button-menu:selected {
+    -fx-background-color: #282828;
+    -fx-text-fill: white;
+}
+
+.button-menu .ikonli-font-icon {
+    -fx-icon-color: #b3b3b3;
+}
+
+.button-menu:hover .ikonli-font-icon,
+.button-menu:selected .ikonli-font-icon {
+    -fx-icon-color: white;
+}
