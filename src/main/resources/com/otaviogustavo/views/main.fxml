@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.image.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<BorderPane xmlns="http://javafx.com/javafx/26"
+  xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.otaviogustavo.controllers.MainController">
+  <left>
+    <VBox prefWidth="300" spacing="10" style="-fx-background-color: #202020ff" alignment="TOP_CENTER">
+      <padding>
+        <Insets top="20" right="10" bottom="10" left="10"/>
+      </padding>
+
+      <HBox spacing="10">
+        <ImageView fitWidth="32" preserveRatio="true">
+          <image>
+            <Image url="@../images/icons/baroness.png"/>
+          </image>
+        </ImageView>
+
+        <Label text="Baroness" styleClass="label-title"/>
+      </HBox>
+
+      <VBox spacing="10">
+        <fx:define>
+          <ToggleGroup fx:id="menuGroup"/>
+        </fx:define>
+        <ToggleButton fx:id="btnHome" text="Início" maxWidth="Infinity" styleClass="button-menu" alignment="CENTER_LEFT" toggleGroup="$menuGroup" selected="true" onAction="#handleMenuAction">
+          <graphic>
+            <FontIcon iconLiteral="ion4-md-home" iconSize="20"/>
+          </graphic>
+        </ToggleButton>
+        <ToggleButton fx:id="btnLibrary" text="Sua Biblioteca" maxWidth="Infinity" styleClass="button-menu" alignment="CENTER_LEFT" toggleGroup="$menuGroup" onAction="#handleMenuAction">
+          <graphic>
+            <FontIcon iconLiteral="ion4-md-albums" iconSize="20"/>
+          </graphic>
+        </ToggleButton>
+      </VBox>
+    </VBox>
+  </left>
+
+  <center>
+    <VBox fx:id="contentArea" style="-fx-background-color: #272727ff">
+    </VBox>
+  </center>
+
+  <bottom>
+    <GridPane prefHeight="80" hgap="20" vgap="20" style="-fx-background-color: #272727ff; -fx-padding: 10px" alignment="CENTER_LEFT">
+      <columnConstraints>
+
+        <ColumnConstraints percentWidth="25"/>
+        <ColumnConstraints percentWidth="50" />
+        <ColumnConstraints percentWidth="25"/>
+
+      </columnConstraints>
+
+      <HBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="0">
+        <Rectangle width="32" height="32" fill="green"/>
+        <VBox alignment="CENTER_LEFT">
+          <Label text="Nome da Música" style="-fx-text-fill: white"/>
+          <Label text="Nome do Juliano" style="-fx-text-fill: white"/>
+        </VBox>
+      </HBox>
+
+      <HBox styleClass="player-controls-container" spacing="10" alignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="0" maxWidth="Infinity">
+        <!-- Botão Voltar -->
+        <Button styleClass="button-player">
+          <graphic>
+            <FontIcon iconLiteral="ion4-ios-skip-backward" iconSize="20"/>
+          </graphic>
+        </Button>
+        <!-- Botão Play -->
+        <ToggleButton fx:id="btnPlay" styleClass="button-player" onAction="#handlePlayAction">
+          <graphic>
+            <FontIcon fx:id="iconPlay" iconLiteral="ion4-ios-play" iconSize="24"/>
+          </graphic>
+        </ToggleButton>
+        <!-- Botão Avançar -->
+        <Button styleClass="button-player">
+          <graphic>
+            <FontIcon iconLiteral="ion4-ios-skip-forward" iconSize="20"/>
+          </graphic>
+        </Button>
+      </HBox>
+    </GridPane>
+  </bottom>
+</BorderPane>
