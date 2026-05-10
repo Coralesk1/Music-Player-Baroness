@@ -1,5 +1,7 @@
 package com.otaviogustavo;
 
+import com.otaviogustavo.controllers.MainController;
+import com.otaviogustavo.controllers.MainLibraryController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -17,9 +19,14 @@ public class App extends Application {
 
     private static Scene scene;
 
+    private static final GerenciadorEstruturas gerenciadorEstruturas = new GerenciadorEstruturas();
+
     @Override
     public void start(Stage stage) throws IOException {
-        scene = new Scene(loadFXML("main"), 1000, 600);
+
+        Parent root = loadFXMLAndInject("main");
+
+        scene = new Scene(root, 1000, 600);
         loadStyle("main");
         stage.setTitle("Baroness Player");
         stage.getIcons().add(
@@ -29,7 +36,8 @@ public class App extends Application {
     }
 
     public static void setRoot(String fxml) throws IOException {
-        scene.setRoot(loadFXML(fxml));
+        // Se no futuro você trocar de tela usando setRoot, ele também injeta o gerenciador
+        scene.setRoot(loadFXMLAndInject(fxml));
         loadStyle(fxml);
     }
 
@@ -41,6 +49,7 @@ public class App extends Application {
         }
     }
 
+    // deixa caso precise carregar algo sem precisar injetar o GerenciadorEstruturas
     private static Parent loadFXML(String fxml) throws IOException {
         URL fxmlLocation = App.class.getResource("views/" + fxml + ".fxml");
         if (fxmlLocation == null) {
@@ -50,8 +59,27 @@ public class App extends Application {
         return fxmlLoader.load();
     }
 
+    //Carrega o FXML, descobre quem é o controller e injeta o gerenciador
+    private static Parent loadFXMLAndInject(String fxml) throws IOException {
+        URL fxmlLocation = App.class.getResource("views/" + fxml + ".fxml");
+        if (fxmlLocation == null) {
+            throw new IOException("FXML file not found: views/" + fxml + ".fxml");
+        }
+
+        FXMLLoader fxmlLoader = new FXMLLoader(fxmlLocation);
+        Parent root = fxmlLoader.load();
+
+        Object controller = fxmlLoader.getController();
+
+        // 1. ENTREGA O GERENCIADOR PARA O MAIN CONTROLLER!
+        if (controller instanceof MainController) {
+            ((MainController) controller).setGerenciador(gerenciadorEstruturas);
+        }
+
+        return root;
+    }
+
     public static void main(String[] args) {
         launch();
     }
-
 }

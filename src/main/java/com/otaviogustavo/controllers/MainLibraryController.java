@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mpatric.mp3agic.ID3v2;
 import com.mpatric.mp3agic.Mp3File;
+import com.otaviogustavo.GerenciadorEstruturas;
 import com.otaviogustavo.LibraryData;
 import com.otaviogustavo.Musica;
 import javafx.collections.FXCollections;
@@ -12,25 +13,43 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
-
+import org.kordamp.ikonli.javafx.FontIcon;
 import java.io.File;
+
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class MainLibraryController {
+
+    private MainController mainController;
+    private GerenciadorEstruturas gerenciadorEstruturas;
+
+    public void setGerenciador(GerenciadorEstruturas gerenciadorEstruturas) {
+        this.gerenciadorEstruturas = gerenciadorEstruturas;
+        // Agora que temos o gerenciador, carregamos os dados do JSON para ele
+        carregarListFileLibraryJson();
+        atualizarTabela();
+    }
+
+    public void setMainController(MainController mainController) {
+        this.mainController = mainController;
+    }
 
     @FXML
     private Button btnOpenFolder;
 
     @FXML private TableView<Musica> tabelaMusicas;
+    @FXML private TableColumn<Musica, Void> colPlay;
     @FXML private TableColumn<Musica, String> colTitulo;
     @FXML private TableColumn<Musica, String> colArtista;
     @FXML private TableColumn<Musica, String> colAlbum;
@@ -46,10 +65,9 @@ public class MainLibraryController {
         colArtista.setCellValueFactory(new PropertyValueFactory<>("artista"));
         colDuracao.setCellValueFactory(new PropertyValueFactory<>("duracao"));
 
-        tabelaMusicas.setItems(listaMusicas);
+        configurarColunaPlay();
 
-        //carrega os arquivos salvos no json e bota na lista
-        carregarListFileLibraryJson();
+        tabelaMusicas.setItems(listaMusicas);
 
         tabelaMusicas.getSelectionModel().selectedItemProperty().addListener((obs, antigoValor, novoValor) -> {
             if (novoValor != null) {
@@ -95,12 +113,12 @@ public class MainLibraryController {
                         Musica musica = lerMetadados(file);
 
                         if (musica != null){
-                            listaMusicas.add(musica);
+                            gerenciadorEstruturas.adicionarMusicaBiblioteca(musica);
                             listaCaminhos.add(file.getAbsolutePath());
-
                         }
                     }
                 }
+                atualizarTabela();
 
                 if (listaCaminhos != null){
                     libraryData.setListaCaminhos(listaCaminhos);
@@ -131,6 +149,7 @@ public class MainLibraryController {
         String titulo = arquivoMp3.getName();
         String artista = "Artista Desconhecido";
         String duracao = "00:00";
+        String caminho = arquivoMp3.getAbsolutePath();
 
         try {
             // Carrega o arquivo MP3
@@ -165,7 +184,7 @@ public class MainLibraryController {
             e.printStackTrace();
         }
 
-        return new Musica(titulo, artista, duracao);
+        return new Musica(titulo, artista, duracao, caminho);
     }
 
     private void carregarListFileLibraryJson() {
@@ -183,7 +202,6 @@ public class MainLibraryController {
             LibraryData dados = gson.fromJson(reader, LibraryData.class);
 
             if (dados != null && dados.getListaCaminhos() != null) {
-                listaMusicas.clear();
 
                 for (String caminho : dados.getListaCaminhos()) {
                     File arquivo = new File(caminho);
@@ -191,14 +209,59 @@ public class MainLibraryController {
                     // verifica se o arquivo existe
                     if (arquivo.exists() && arquivo.isFile()) {
                         Musica musica = lerMetadados(arquivo);
-                        listaMusicas.add(musica);
+                        if (gerenciadorEstruturas != null) {
+                            gerenciadorEstruturas.adicionarMusicaBiblioteca(musica);
+                        }
                     }
                 }
+                atualizarTabela();
                 System.out.println("Biblioteca carregada do JSON!");
             }
         } catch (IOException e) {
             System.err.println("Erro ao carregar o arquivo JSON:");
             e.printStackTrace();
+        }
+    }
+
+    private void atualizarTabela() {
+        if (gerenciadorEstruturas != null) {
+            listaMusicas.setAll(gerenciadorEstruturas.getBibliotecaGeral());
+        }
+    }
+
+    // metodo para criar um botão de play para cada linha da tabela de musica da biblioteca
+    private void configurarColunaPlay() {
+        colPlay.setCellFactory(column -> new TableCell<>() {
+            private final Button btnPlay = new Button();
+            {
+                btnPlay.getStyleClass().add("button-player");
+                FontIcon iconPlay = new FontIcon("ion4-ios-play");
+                iconPlay.setIconSize(24);
+                btnPlay.setGraphic(iconPlay);
+                btnPlay.setOnAction(event -> {
+                    Musica musica = getTableView().getItems().get(getIndex());
+
+                    //ao final chama o metodo pra tocar
+                    tocarMusica(musica);
+                });
+            }
+
+            //atualiza o botão de play para as musicas que não estão aparecendo na lista
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(btnPlay);
+                }
+            }
+        });
+    }
+
+    public void tocarMusica(Musica musica) {
+        if (mainController != null) {
+            mainController.tocarMusica(musica);
         }
     }
 }
