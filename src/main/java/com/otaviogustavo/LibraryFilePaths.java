@@ -2,7 +2,7 @@ package com.otaviogustavo;
 
 import java.util.List;
 
-public class LibraryData {
+public class LibraryFilePaths {
 
 
     private List<String> listaCaminhos;

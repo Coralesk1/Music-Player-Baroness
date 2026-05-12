@@ -5,7 +5,7 @@
 <?import javafx.geometry.Insets?>
 
 <VBox xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.otaviogustavo.controllers.CreatePlaylistController"
+      fx:controller="com.otaviogustavo.controllers.MainPlaylistController"
       spacing="20" styleClass="dialog-container" prefWidth="450">
     <padding>
         <Insets top="25" right="25" bottom="25" left="25"/>

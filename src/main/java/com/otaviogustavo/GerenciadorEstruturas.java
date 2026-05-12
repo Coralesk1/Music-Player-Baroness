@@ -5,7 +5,7 @@ import java.util.*;
 public class GerenciadorEstruturas {
 
     private Set<Musica> bibliotecaGeral;
-    private Map<String, List<Musica>> playlists;
+    private Map<PlayList, List<Musica>> playlists;
 
     public GerenciadorEstruturas(){
         this.bibliotecaGeral = new LinkedHashSet<>();
@@ -19,4 +19,24 @@ public class GerenciadorEstruturas {
     public Set<Musica> getBibliotecaGeral() {
         return bibliotecaGeral;
     }
+
+    public Map<PlayList, List<Musica>> getPlaylists(){
+        return playlists;
+    }
+
+    public void criaPlaylistVazia(PlayList playList){
+        playlists.put(playList, new ArrayList<>());
+    }
+
+    public void adicionarMusicaPLaylist(PlayList playList, Musica musica){
+        playlists.get(playList).add(musica);
+    }
+
+
+
+
 }
+
+
+
+

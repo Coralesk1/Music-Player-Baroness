@@ -1,7 +1,6 @@
 package com.otaviogustavo;
 
 import com.otaviogustavo.controllers.MainController;
-import com.otaviogustavo.controllers.MainLibraryController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;

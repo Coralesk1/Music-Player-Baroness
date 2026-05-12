@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.mpatric.mp3agic.ID3v2;
 import com.mpatric.mp3agic.Mp3File;
 import com.otaviogustavo.GerenciadorEstruturas;
-import com.otaviogustavo.LibraryData;
+import com.otaviogustavo.LibraryFilePaths;
 import com.otaviogustavo.Musica;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -86,7 +86,7 @@ public class MainLibraryController {
 
         DirectoryChooser directoryChooser = new DirectoryChooser();
         List<String> listaCaminhos = new ArrayList<>();
-        LibraryData libraryData = new LibraryData();
+        LibraryFilePaths libraryData = new LibraryFilePaths();
 
 
         directoryChooser.setTitle("Selecionar Pasta");
@@ -198,7 +198,7 @@ public class MainLibraryController {
         try (FileReader reader = new FileReader(arquivoJson)) {
 
             // Passa os dados do json para o objeto LibraryData
-            LibraryData dados = gson.fromJson(reader, LibraryData.class);
+            LibraryFilePaths dados = gson.fromJson(reader, LibraryFilePaths.class);
 
             if (dados != null && dados.getListaCaminhos() != null) {
 

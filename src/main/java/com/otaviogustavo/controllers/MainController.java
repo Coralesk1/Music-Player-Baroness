@@ -9,7 +9,6 @@ import com.otaviogustavo.App;
 
 import com.otaviogustavo.GerenciadorEstruturas;
 import com.otaviogustavo.Musica;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -46,13 +45,11 @@ public class MainController {
     @FXML private ComboBox<String> comboPlaylists;
     @FXML private Button btnNewPlaylist;
 
-    // Player Controls
     @FXML private ToggleButton btnPlay;
     @FXML private Button btnNext;
     @FXML private Button btnPrevious;
     @FXML private FontIcon iconPlay;
 
-    // Player Metadata & Timeline
     @FXML private Label lblTitulo;
     @FXML private Label lblArtista;
     @FXML private Label lblTempoAtual;
@@ -66,7 +63,7 @@ public class MainController {
             FXMLLoader loader = new FXMLLoader(fxmlLocation);
             Parent root = loader.load();
 
-            CreatePlaylistController dialogController = loader.getController();
+            MainPlaylistController dialogController = loader.getController();
 
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
@@ -140,6 +137,7 @@ public class MainController {
     public void tocarMusica(Musica musica) {
         if (musica == null) return;
 
+        //se ja estiver tocando uma musica, para para dar os recursos para outra que for torcar
         if (mediaPlayer != null) {
             mediaPlayer.stop();
             mediaPlayer.dispose();
@@ -151,7 +149,6 @@ public class MainController {
             Media media = new Media(file.toURI().toString());
             mediaPlayer = new MediaPlayer(media);
 
-            // Atualiza UI
             lblTitulo.setText(musica.getTitulo());
             lblArtista.setText(musica.getArtista());
             btnPlay.setSelected(true);
