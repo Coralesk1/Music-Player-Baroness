@@ -49,3 +49,101 @@
 .button-menu:selected .ikonli-font-icon {
     -fx-icon-color: white;
 }
+
+.combo-playlists {
+    -fx-background-color: #282828;
+    -fx-background-radius: 5;
+    -fx-border-color: #3e3e3e;
+    -fx-border-radius: 5;
+    -fx-padding: 2 5 2 5;
+    -fx-cursor: hand;
+}
+
+.combo-playlists .label {
+    -fx-text-fill: #b3b3b3;
+}
+
+.combo-playlists:hover .label {
+    -fx-text-fill: white;
+}
+
+.combo-playlists .list-view {
+    -fx-background-color: #282828;
+    -fx-border-color: #3e3e3e;
+}
+
+.combo-playlists .list-cell {
+    -fx-background-color: #282828;
+    -fx-text-fill: white;
+    -fx-padding: 10;
+}
+
+.combo-playlists .list-cell:hover {
+    -fx-background-color: #3e3e3e;
+}
+
+.combo-playlists .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.combo-playlists .arrow {
+    -fx-background-color: #b3b3b3;
+}
+
+.combo-playlists:hover .arrow {
+    -fx-background-color: white;
+}
+
+/* Dialog Styles */
+.dialog-container {
+    -fx-background-color: #212121;
+    -fx-border-color: #3e3e3e;
+    -fx-border-width: 1px;
+}
+
+.dialog-title {
+    -fx-text-fill: white;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.field-label {
+    -fx-text-fill: #b3b3b3;
+    -fx-font-size: 12px;
+}
+
+.dialog-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent #3e3e3e transparent;
+    -fx-text-fill: white;
+    -fx-prompt-text-fill: #727272;
+    -fx-padding: 5 0 5 0;
+}
+
+.dialog-field:focused {
+    -fx-border-color: transparent transparent #3ea6ff transparent;
+}
+
+.button-dialog-cancel {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.button-dialog-cancel:hover {
+    -fx-text-fill: #3ea6ff;
+}
+
+.button-dialog-create {
+    -fx-background-color: white;
+    -fx-text-fill: black;
+    -fx-background-radius: 20;
+    -fx-font-weight: bold;
+    -fx-padding: 8 20 8 20;
+    -fx-cursor: hand;
+}
+
+.button-dialog-create:hover {
+    -fx-background-color: #e0e0e0;
+}

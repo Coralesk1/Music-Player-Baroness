@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.otaviogustavo.controllers.CreatePlaylistController"
+      spacing="20" styleClass="dialog-container" prefWidth="450">
+    <padding>
+        <Insets top="25" right="25" bottom="25" left="25"/>
+    </padding>
+
+    <Label text="Nova playlist" styleClass="dialog-title"/>
+
+    <VBox spacing="15">
+        <VBox spacing="5">
+            <Label text="Título" styleClass="field-label"/>
+            <TextField fx:id="txtTitle" promptText="Dê um nome à sua playlist" styleClass="dialog-field"/>
+        </VBox>
+
+        <VBox spacing="5">
+            <Label text="Descrição" styleClass="field-label"/>
+            <TextArea fx:id="txtDescription" promptText="Adicione uma descrição opcional" prefHeight="100" styleClass="dialog-field" wrapText="true"/>
+        </VBox>
+    </VBox>
+
+    <HBox spacing="10" alignment="BOTTOM_RIGHT" style="-fx-padding: 10 0 0 0;">
+        <Button text="Cancelar" fx:id="btnCancel" onAction="#handleCancel" styleClass="button-dialog-cancel"/>
+        <Button text="Criar" fx:id="btnCreate" onAction="#handleCreate" styleClass="button-dialog-create"/>
+    </HBox>
+</VBox>

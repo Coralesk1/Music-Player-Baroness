@@ -14,13 +14,19 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.scene.paint.Color;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 
@@ -37,6 +43,8 @@ public class MainController {
     @FXML private VBox contentArea;
     @FXML private ToggleButton btnHome;
     @FXML private ToggleButton btnLibrary;
+    @FXML private ComboBox<String> comboPlaylists;
+    @FXML private Button btnNewPlaylist;
 
     // Player Controls
     @FXML private ToggleButton btnPlay;
@@ -50,6 +58,42 @@ public class MainController {
     @FXML private Label lblTempoAtual;
     @FXML private Label lblTempoTotal;
     @FXML private Slider sliderTime;
+
+    @FXML
+    private void handleNewPlaylistAction(ActionEvent event) {
+        try {
+            URL fxmlLocation = App.class.getResource("/com/otaviogustavo/views/create_playlist_dialog.fxml");
+            FXMLLoader loader = new FXMLLoader(fxmlLocation);
+            Parent root = loader.load();
+
+            CreatePlaylistController dialogController = loader.getController();
+
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initStyle(StageStyle.UNDECORATED); // Estilo minimalista sem bordas do sistema
+            stage.initOwner(btnNewPlaylist.getScene().getWindow());
+
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add(App.class.getResource("/com/otaviogustavo/css/main.css").toExternalForm());
+            scene.setFill(Color.TRANSPARENT); // Suporte para cantos arredondados se o CSS permitir
+            stage.setScene(scene);
+
+            stage.showAndWait();
+
+            if (dialogController.isCreated()) {
+                String nome = dialogController.getTitle();
+                String descricao = dialogController.getDescription();
+                System.out.println("Nova playlist criada: " + nome + " - " + descricao);
+                
+                // Futuramente adicionar lógica para salvar no GerenciadorEstruturas
+                comboPlaylists.getItems().add(nome);
+                comboPlaylists.setValue(nome);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     @FXML
     private void handleMenuAction(ActionEvent event) {

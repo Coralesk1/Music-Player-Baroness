@@ -107,8 +107,7 @@ public class MainLibraryController {
             if (pastaArquivos != null) {
 
                 for (File file : pastaArquivos) {
-
-                    if (file.isFile() || (file.getName().endsWith(".mp3") || file.getName().endsWith(".wav"))){
+                    if (file.isFile() && (file.getName().endsWith(".mp3") || file.getName().endsWith(".wav"))){
 
                         Musica musica = lerMetadados(file);
 

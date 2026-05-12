@@ -39,6 +39,15 @@
             <FontIcon iconLiteral="ion4-md-albums" iconSize="20"/>
           </graphic>
         </ToggleButton>
+        <VBox spacing="5" style="-fx-padding: 10 0 0 0;">
+           <Button fx:id="btnNewPlaylist" text="Nova Playlist" maxWidth="Infinity" styleClass="button-menu" alignment="CENTER_LEFT" onAction="#handleNewPlaylistAction">
+             <graphic>
+               <FontIcon iconLiteral="ion4-md-add" iconSize="20"/>
+             </graphic>
+           </Button>
+           <Label text="Playlists" style="-fx-text-fill: #b3b3b3; -fx-font-size: 12px; -fx-font-weight: bold; -fx-padding: 10 0 5 15;"/>
+           <ComboBox fx:id="comboPlaylists" promptText="Selecionar Playlist" maxWidth="Infinity" styleClass="combo-playlists"/>
+        </VBox>
       </VBox>
     </VBox>
   </left>
