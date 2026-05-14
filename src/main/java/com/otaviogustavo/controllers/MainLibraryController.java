@@ -36,7 +36,7 @@ public class MainLibraryController {
 
     public void setGerenciador(GerenciadorEstruturas gerenciadorEstruturas) {
         this.gerenciadorEstruturas = gerenciadorEstruturas;
-        // Agora que temos o gerenciador, carregamos os dados do JSON para ele
+
         carregarListFileLibraryJson();
         atualizarTabela();
     }
@@ -217,7 +217,7 @@ public class MainLibraryController {
                 System.out.println("Biblioteca carregada do JSON!");
             }
         } catch (IOException e) {
-            System.err.println("Erro ao carregar o arquivo JSON:");
+            System.err.println("Erro ao carregar o arquivo JSON: " + arquivoJson);
             e.printStackTrace();
         }
     }

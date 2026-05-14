@@ -1,14 +1,18 @@
 package com.otaviogustavo.controllers;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.otaviogustavo.App;
 
 import com.otaviogustavo.GerenciadorEstruturas;
 import com.otaviogustavo.Musica;
+import com.otaviogustavo.PlayList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -58,33 +62,54 @@ public class MainController {
 
     @FXML
     private void handleNewPlaylistAction(ActionEvent event) {
+
         try {
+
             URL fxmlLocation = App.class.getResource("/com/otaviogustavo/views/create_playlist_dialog.fxml");
             FXMLLoader loader = new FXMLLoader(fxmlLocation);
             Parent root = loader.load();
 
-            MainPlaylistController dialogController = loader.getController();
+            MainPlaylistController mainPlaylistController = loader.getController();
 
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
-            stage.initStyle(StageStyle.UNDECORATED); // Estilo minimalista sem bordas do sistema
+            stage.initStyle(StageStyle.UNDECORATED);
             stage.initOwner(btnNewPlaylist.getScene().getWindow());
 
             Scene scene = new Scene(root);
             scene.getStylesheets().add(App.class.getResource("/com/otaviogustavo/css/main.css").toExternalForm());
-            scene.setFill(Color.TRANSPARENT); // Suporte para cantos arredondados se o CSS permitir
+            scene.setFill(Color.TRANSPARENT);
             stage.setScene(scene);
 
             stage.showAndWait();
 
-            if (dialogController.isCreated()) {
-                String nome = dialogController.getTitle();
-                String descricao = dialogController.getDescription();
+            if (mainPlaylistController.isCriado()) {
+                String nome = mainPlaylistController.getTitulo();
+                String descricao = mainPlaylistController.getDescricao();
                 System.out.println("Nova playlist criada: " + nome + " - " + descricao);
-                
-                // Futuramente adicionar lógica para salvar no GerenciadorEstruturas
-                comboPlaylists.getItems().add(nome);
-                comboPlaylists.setValue(nome);
+
+                gerenciadorEstruturas.criaPlaylistVazia(new PlayList(nome, descricao));
+
+                Map<PlayList, List<Musica>> playlist =  gerenciadorEstruturas.getPlaylists();
+
+                if (playlist != null){
+
+                    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+                    // Grava o arquivo de configuração na raiz do projeto
+                    try (FileWriter writer = new FileWriter("PlayLists.json")) {
+                        gson.toJson(playlist, writer);
+                        System.out.println("Playlist salva com sucesso em PlayLists.json!");
+
+                    } catch (IOException e) {
+                        System.err.println("Erro ao salvar playlist:" + e.getMessage());
+                        e.printStackTrace();
+                    }
+
+                    comboPlaylists.getItems().add(nome);
+                    comboPlaylists.setValue(nome);
+                }
+
             }
 
         } catch (IOException e) {
@@ -235,7 +260,11 @@ public class MainController {
     }
 
     private void loadView(String fxml) {
+
+        carregaComboPlaylist();
+
         try {
+
             URL fxmlLocation = App.class.getResource("/com/otaviogustavo/views/" + fxml + ".fxml");
             if (fxmlLocation == null) {
                 System.err.println("FXML file not found: /com/otaviogustavo/views/" + fxml + ".fxml");
@@ -252,11 +281,53 @@ public class MainController {
                 libraryController.setMainController(this);
             }
 
+            /*if (subController instanceof MainPlaylistController) {
+                MainPlaylistController mainPlaylistController = (MainPlaylistController) subController;
+                mainPlaylistController.setGerenciador(this.gerenciadorEstruturas);
+                mainPlaylistController.setMainController(this);
+            }*/
+
             contentArea.getChildren().setAll(root);
 
         } catch (IOException e) {
             System.err.println("Erro ao carregar a view: " + fxml);
             e.printStackTrace();
+        }
+    }
+
+    private void carregaComboPlaylist(){
+
+        File arquivoJson = new File("PlayLists.json");
+
+        if (!arquivoJson.exists()) {
+            return;
+        }
+
+        Gson gson = new Gson();
+
+        try(FileReader reader = new FileReader(arquivoJson)){
+
+            Map<PlayList, List<Musica>> dados = gson.fromJson(reader, GerenciadorEstruturas.class).getPlaylists();
+
+            if (dados != null){
+
+                for (Map.Entry<PlayList, List<Musica>> playlists : dados.entrySet()){
+                    gerenciadorEstruturas.setPlaylists(playlists);
+                }
+            }
+            atualizaComboBoxPlaylist();
+
+        } catch (IOException e) {
+            System.err.println("Erro ao carregar o arquivo JSON: " + arquivoJson);
+            e.printStackTrace();
+        }
+    }
+
+    private void atualizaComboBoxPlaylist(){
+        if (gerenciadorEstruturas != null){
+            gerenciadorEstruturas.getPlaylists().keySet().forEach(playlist -> {
+                comboPlaylists.getItems().add(playlist.getNome());
+            });
         }
     }
 

@@ -66,6 +66,16 @@ public class Musica {
         return java.util.Objects.hash(caminho);
     }
 
+    @Override
+    public String toString() {
+        return "Musica{" +
+                "titulo='" + titulo + '\'' +
+                ", artista='" + artista + '\'' +
+                ", duracao='" + duracao + '\'' +
+                ", caminho='" + caminho + '\'' +
+                '}';
+    }
+
     /*
 
     Explicação do funcionamento interno do java em estruturas como LinkedHashSet que estamos usando.

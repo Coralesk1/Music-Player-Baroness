@@ -24,6 +24,10 @@ public class GerenciadorEstruturas {
         return playlists;
     }
 
+    public void setPlaylists(Map.Entry<PlayList, List<Musica>> playlist) {
+        playlists.put(playlist.getKey(), playlist.getValue());
+    }
+
     public void criaPlaylistVazia(PlayList playList){
         playlists.put(playList, new ArrayList<>());
     }
@@ -31,8 +35,6 @@ public class GerenciadorEstruturas {
     public void adicionarMusicaPLaylist(PlayList playList, Musica musica){
         playlists.get(playList).add(musica);
     }
-
-
 
 
 }

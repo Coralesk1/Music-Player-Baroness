@@ -1,16 +1,12 @@
 package com.otaviogustavo.controllers;
 
 import com.otaviogustavo.GerenciadorEstruturas;
-import com.otaviogustavo.Musica;
-import com.otaviogustavo.PlayList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
-import java.util.List;
-import java.util.Map;
 
 public class MainPlaylistController {
 
@@ -24,6 +20,10 @@ public class MainPlaylistController {
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
     }
+
+    private String titulo;
+    private String descricao;
+    private Boolean isCriado;
 
     @FXML private TextField txtTitle;
     @FXML private TextArea txtDescription;
@@ -42,11 +42,11 @@ public class MainPlaylistController {
             return;
         }
 
-        gerenciadorEstruturas.criaPlaylistVazia(new PlayList(String.valueOf(txtTitle), String.valueOf(txtDescription)));
+        titulo = txtTitle.getText().trim();
+        descricao = txtDescription.getText().trim();
+        isCriado = true;
 
         closeStage();
-
-        Map<PlayList, List<Musica>> teste= gerenciadorEstruturas.getPlaylists();
 
     }
 
@@ -55,4 +55,27 @@ public class MainPlaylistController {
         stage.close();
     }
 
+    public String getTitulo() {
+        return titulo;
+    }
+
+    public void setTitulo(String titulo) {
+        this.titulo = titulo;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
+    }
+
+    public Boolean isCriado() {
+        return isCriado;
+    }
+
+    public void setIsCriado(Boolean crirado) {
+        isCriado = crirado;
+    }
 }

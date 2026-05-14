@@ -25,4 +25,12 @@ public class PlayList {
     public void setDescricao(String descricao) {
         this.descricao = descricao;
     }
+
+    @Override
+    public String toString() {
+        return "PlayList{" +
+                "nome='" + nome + '\'' +
+                ", descricao='" + descricao + '\'' +
+                '}';
+    }
 }

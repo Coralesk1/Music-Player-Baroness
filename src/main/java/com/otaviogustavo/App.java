@@ -48,7 +48,7 @@ public class App extends Application {
         }
     }
 
-    // deixa caso precise carregar algo sem precisar injetar o GerenciadorEstruturas
+    // deixei caso precise carregar algo sem precisar injetar o GerenciadorEstruturas
     private static Parent loadFXML(String fxml) throws IOException {
         URL fxmlLocation = App.class.getResource("views/" + fxml + ".fxml");
         if (fxmlLocation == null) {
