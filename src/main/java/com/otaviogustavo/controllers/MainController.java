@@ -62,7 +62,6 @@ public class MainController {
 
     @FXML
     private void handleNewPlaylistAction(ActionEvent event) {
-
         try {
 
             URL fxmlLocation = App.class.getResource("/com/otaviogustavo/views/create_playlist_dialog.fxml");
@@ -94,11 +93,12 @@ public class MainController {
 
                 if (playlist != null){
 
-                    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                    Gson gson = new GsonBuilder().enableComplexMapKeySerialization().setPrettyPrinting().create();
+
 
                     // Grava o arquivo de configuração na raiz do projeto
                     try (FileWriter writer = new FileWriter("PlayLists.json")) {
-                        gson.toJson(playlist, writer);
+                        gson.toJson(gerenciadorEstruturas, writer);
                         System.out.println("Playlist salva com sucesso em PlayLists.json!");
 
                     } catch (IOException e) {

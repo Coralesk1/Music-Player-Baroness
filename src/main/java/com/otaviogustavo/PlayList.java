@@ -1,5 +1,7 @@
 package com.otaviogustavo;
 
+import java.util.Objects;
+
 public class PlayList {
 
     private String nome;
@@ -33,4 +35,18 @@ public class PlayList {
                 ", descricao='" + descricao + '\'' +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+         if (this == o) return true;
+         if (o == null || getClass() != o.getClass()) return false;
+         PlayList playList = (PlayList) o;
+         return Objects.equals(nome, playList.nome) && Objects.equals(descricao, playList.descricao);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nome, descricao);
+    }
+
 }
