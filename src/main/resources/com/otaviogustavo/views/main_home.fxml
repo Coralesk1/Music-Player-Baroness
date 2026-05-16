@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" spacing="20">
+    <padding>
+        <Insets top="40" right="40" bottom="40" left="40"/>
+    </padding>
+    <Label text="Bem-vindo ao Baroness" style="-fx-text-fill: white; -fx-font-size: 32px; -fx-font-weight: bold;"/>
+    <Label text="Escolha algo para ouvir..." style="-fx-text-fill: #b3b3b3; -fx-font-size: 16px;"/>
+</VBox>
