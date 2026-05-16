@@ -7,6 +7,9 @@ public class Musica {
     private String duracao;
     private String caminho;
 
+    public Musica() { // construtor vazio por causa do Gson conseguir fazer a deserializaÃ§Ã£o do json
+    }
+
     public Musica(String titulo, String artista, String duracao, String caminho) {
         this.titulo = titulo;
         this.artista = artista;
@@ -49,10 +52,10 @@ public class Musica {
 
     /*
     * usando uma sobrescrita de metodo para adaptar o metodo para evitar duplicidade
-    * assim comparamos o caminho da musica se passar pela verificação de igualdade entre objetos em memoria */
+    * assim comparamos o caminho da musica se passar pela verificaï¿½ï¿½o de igualdade entre objetos em memoria */
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true; // verificação em memoria
+        if (this == o) return true; // verificaï¿½ï¿½o em memoria
         if (o == null || getClass() != o.getClass()) return false;
         Musica musica = (Musica) o;
         return java.util.Objects.equals(caminho, musica.caminho);
@@ -60,7 +63,7 @@ public class Musica {
 
 
     /*
-    * foi sobrescrevido também para o uso interno do java */
+    * foi sobrescrevido tambï¿½m para o uso interno do java */
     @Override
     public int hashCode() {
         return java.util.Objects.hash(caminho);
@@ -78,21 +81,21 @@ public class Musica {
 
     /*
 
-    Explicação do funcionamento interno do java em estruturas como LinkedHashSet que estamos usando.
+    Explicaï¿½ï¿½o do funcionamento interno do java em estruturas como LinkedHashSet que estamos usando.
 
-    * Tentou adicionar uma Música no Set
+    * Tentou adicionar uma Mï¿½sica no Set
           ?
           ?
-1. Chama o 'hashCode()' da música para calcular a "gaveta" (número hash).
+1. Chama o 'hashCode()' da mï¿½sica para calcular a "gaveta" (nï¿½mero hash).
           ?
-          ??? Gaveta está VAZIA? ??? Guarda a música lá. (Fim! O 'equals' nem foi chamado).
+          ??? Gaveta estï¿½ VAZIA? ??? Guarda a mï¿½sica lï¿½. (Fim! O 'equals' nem foi chamado).
           ?
-          ??? Gaveta está OCUPADA? (Colisão de hash)
+          ??? Gaveta estï¿½ OCUPADA? (Colisï¿½o de hash)
                     ?
                     ?
-               2. O Set chama o 'equals()' para comparar a música nova
-                  com a(s) música(s) que já estão dentro daquela gaveta.
+               2. O Set chama o 'equals()' para comparar a mï¿½sica nova
+                  com a(s) mï¿½sica(s) que jï¿½ estï¿½o dentro daquela gaveta.
                     ?
-                    ??? Retornou TRUE (Caminhos iguais) ??? Rejeita (Música duplicada).
+                    ??? Retornou TRUE (Caminhos iguais) ??? Rejeita (Mï¿½sica duplicada).
                     ??? Retornou FALSE (Caminhos diferentes) ??? Adiciona na mesma gaveta.*/
 }

@@ -83,6 +83,7 @@ public class MainController {
             stage.showAndWait();
 
             if (mainPlaylistController.isCriado()) {
+
                 String nome = mainPlaylistController.getTitulo();
                 String descricao = mainPlaylistController.getDescricao();
                 System.out.println("Nova playlist criada: " + nome + " - " + descricao);
@@ -94,7 +95,6 @@ public class MainController {
                 if (playlist != null){
 
                     Gson gson = new GsonBuilder().enableComplexMapKeySerialization().setPrettyPrinting().create();
-
 
                     // Grava o arquivo de configuração na raiz do projeto
                     try (FileWriter writer = new FileWriter("PlayLists.json")) {
@@ -303,17 +303,15 @@ public class MainController {
             return;
         }
 
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
 
         try(FileReader reader = new FileReader(arquivoJson)){
 
-            Map<PlayList, List<Musica>> dados = gson.fromJson(reader, GerenciadorEstruturas.class).getPlaylists();
+            GerenciadorEstruturas dados = gson.fromJson(reader, GerenciadorEstruturas.class);
 
             if (dados != null){
-
-                for (Map.Entry<PlayList, List<Musica>> playlists : dados.entrySet()){
-                    gerenciadorEstruturas.setPlaylists(playlists);
-                }
+                comboPlaylists.getItems().clear();
+                this.gerenciadorEstruturas = dados;
             }
             atualizaComboBoxPlaylist();
 

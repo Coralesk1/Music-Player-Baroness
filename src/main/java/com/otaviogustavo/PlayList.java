@@ -7,6 +7,9 @@ public class PlayList {
     private String nome;
     private String descricao;
 
+    public PlayList() { // construtor vazio por causa do Gson conseguir fazer a deserialização do json
+    }
+
     public PlayList(String nome, String descricao){
         this.nome = nome;
         this.descricao = descricao;
