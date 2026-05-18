@@ -10,7 +10,7 @@
     <HBox alignment="CENTER_LEFT">
         <Label text="Sua Biblioteca" style="-fx-text-fill: white; -fx-font-size: 32px; -fx-font-weight: bold;"/>
         <Pane HBox.hgrow="ALWAYS"/>
-        <Button fx:id="btnOpenFolder" text="Adicionar pasta" onAction="#abreJanelaArquivos"/>
+        <Button fx:id="btnOpenFolder" text="Adicionar pasta" onAction="#abreJanelaArquivos" styleClass="button-add-folder"/>
     </HBox>
 
     <TableView fx:id="tabelaMusicas" VBox.vgrow="ALWAYS" styleClass="musica-table">
@@ -21,6 +21,4 @@
             <TableColumn fx:id="colDuracao" text="Duração" prefWidth="80" />
         </columns>
     </TableView>
-
-
 </VBox>

@@ -147,3 +147,119 @@
 .button-dialog-create:hover {
     -fx-background-color: #e0e0e0;
 }
+
+/* Custom Sliders (Progress and Volume) */
+.custom-slider {
+    -fx-cursor: hand;
+}
+
+.custom-slider .track {
+    -fx-background-color: #1a1a1a;
+    -fx-background-insets: 0;
+    -fx-background-radius: 5;
+    -fx-pref-height: 5px;
+}
+
+.custom-slider .thumb {
+    -fx-background-color: white;
+    -fx-background-insets: 0;
+    -fx-background-radius: 10;
+    -fx-padding: 7;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 4, 0, 0, 2);
+    -fx-opacity: 0; /* Escondido por padrão, aparece no hover */
+}
+
+.custom-slider:hover .thumb {
+    -fx-opacity: 1;
+}
+
+.custom-slider .thumb:hover {
+    -fx-scale-x: 1.2;
+    -fx-scale-y: 1.2;
+}
+
+/* Table Styles */
+.musica-table {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+    -fx-border-color: transparent;
+}
+
+.musica-table .column-header-background {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent #3e3e3e transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.musica-table .column-header {
+    -fx-background-color: transparent;
+    -fx-size: 40px;
+    -fx-padding: 0 10 0 10;
+}
+
+.musica-table .column-header .label {
+    -fx-text-fill: #b3b3b3;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-alignment: center-left;
+}
+
+.musica-table .table-row-cell {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0, 0 0 1 0;
+    -fx-padding: 0;
+    -fx-cell-size: 50px;
+}
+
+.musica-table .table-row-cell:hover {
+    -fx-background-color: #3e3e3e55;
+}
+
+.musica-table .table-row-cell:selected {
+    -fx-background-color: #3e3e3e;
+}
+
+.musica-table .table-cell {
+    -fx-border-color: transparent;
+    -fx-padding: 0 10 0 10;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+}
+
+.musica-table .scroll-bar:vertical,
+.musica-table .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+}
+
+.musica-table .scroll-bar:vertical .thumb,
+.musica-table .scroll-bar:horizontal .thumb {
+    -fx-background-color: #3e3e3e;
+    -fx-background-radius: 10;
+}
+
+.musica-table .filler {
+    -fx-background-color: transparent;
+}
+
+.musica-table .placeholder .label {
+    -fx-text-fill: #b3b3b3;
+}
+
+/* Add Folder Button with Gradient Border */
+.button-add-folder {
+    -fx-background-color: #121212;
+    -fx-text-fill: white;
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
+    -fx-border-width: 2;
+    -fx-border-color: linear-gradient(to right, #ff00cc, #9900ff);
+    -fx-padding: 8 20 8 20;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.button-add-folder:hover {
+    -fx-background-color: #1e1e1e;
+    -fx-border-color: linear-gradient(to right, #ff33dd, #b233ff);
+}

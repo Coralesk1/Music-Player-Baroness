@@ -231,28 +231,54 @@ public class MainLibraryController {
     // metodo para criar um botão de play para cada linha da tabela de musica da biblioteca
     private void configurarColunaPlay() {
         colPlay.setCellFactory(column -> new TableCell<>() {
-            private final Button btnPlay = new Button();
-            {
-                btnPlay.getStyleClass().add("button-player");
-                FontIcon iconPlay = new FontIcon("ion4-ios-play");
-                iconPlay.setIconSize(24);
-                btnPlay.setGraphic(iconPlay);
-                btnPlay.setOnAction(event -> {
-                    Musica musica = getTableView().getItems().get(getIndex());
+            private final Button btnPlayLocal = new Button();
+            private final FontIcon iconPlay = new FontIcon("ion4-ios-play");
 
-                    //ao final chama o metodo pra tocar
+            {
+                btnPlayLocal.getStyleClass().add("button-player");
+                iconPlay.setIconSize(24);
+                btnPlayLocal.setGraphic(iconPlay);
+                btnPlayLocal.setOnAction(event -> {
+                    Musica musica = getTableView().getItems().get(getIndex());
                     tocarMusica(musica);
                 });
             }
 
-            //atualiza o botão de play para as musicas que não estão aparecendo na lista
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty) {
+                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
                     setGraphic(null);
                 } else {
-                    setGraphic(btnPlay);
+                    Musica musicaDaLinha = getTableRow().getItem();
+                    setGraphic(btnPlayLocal);
+
+                    // Sincroniza o ícone baseado no estado do MainController
+                    if (mainController != null) {
+                        atualizarIcone(musicaDaLinha);
+
+                        // Listeners para reagir a mudanças no player global
+                        mainController.tocandoProperty().addListener((obs, antigo, tocando) -> {
+                            if (getTableRow() != null && getTableRow().getItem() != null) {
+                                atualizarIcone(getTableRow().getItem());
+                            }
+                        });
+                        mainController.musicaAtualProperty().addListener((obs, antiga, nova) -> {
+                            if (getTableRow() != null && getTableRow().getItem() != null) {
+                                atualizarIcone(getTableRow().getItem());
+                            }
+                        });
+                    }
+                }
+            }
+
+            private void atualizarIcone(Musica musicaDaLinha) {
+                if (mainController.musicaAtualProperty().get() != null &&
+                    mainController.musicaAtualProperty().get().equals(musicaDaLinha) &&
+                    mainController.tocandoProperty().get()) {
+                    iconPlay.setIconLiteral("ion4-ios-pause");
+                } else {
+                    iconPlay.setIconLiteral("ion4-ios-play");
                 }
             }
         });

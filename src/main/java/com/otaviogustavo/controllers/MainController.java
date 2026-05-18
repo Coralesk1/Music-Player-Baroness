@@ -13,6 +13,10 @@ import com.otaviogustavo.App;
 import com.otaviogustavo.GerenciadorEstruturas;
 import com.otaviogustavo.Musica;
 import com.otaviogustavo.PlayList;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -37,7 +41,16 @@ public class MainController {
 
     private GerenciadorEstruturas gerenciadorEstruturas;
     private MediaPlayer mediaPlayer;
-    private Musica musicaAtual;
+    private final ObjectProperty<Musica> musicaAtual = new SimpleObjectProperty<>(null);
+    private final BooleanProperty tocando = new SimpleBooleanProperty(false);
+
+    public BooleanProperty tocandoProperty() {
+        return tocando;
+    }
+
+    public ObjectProperty<Musica> musicaAtualProperty() {
+        return musicaAtual;
+    }
 
     public void setGerenciador(GerenciadorEstruturas gerenciadorEstruturas) {
         this.gerenciadorEstruturas = gerenciadorEstruturas;
@@ -59,6 +72,34 @@ public class MainController {
     @FXML private Label lblTempoAtual;
     @FXML private Label lblTempoTotal;
     @FXML private Slider sliderTime;
+
+    @FXML private Button btnSilenciar;
+    @FXML private FontIcon iconVolume;
+    @FXML private Slider sliderVolume;
+
+    private double volumeAtual = 1.0;
+    private boolean estaMudo = false;
+    private double volumeAntesDeSilenciar = 1.0;
+
+    @FXML
+    private void lidarComSilenciar(ActionEvent event) {
+        if (estaMudo) {
+            estaMudo = false;
+            volumeAtual = volumeAntesDeSilenciar;
+            sliderVolume.setValue(volumeAtual * 100);
+            iconVolume.setIconLiteral("ion4-ios-volume-high");
+        } else {
+            volumeAntesDeSilenciar = volumeAtual;
+            estaMudo = true;
+            volumeAtual = 0;
+            sliderVolume.setValue(0);
+            iconVolume.setIconLiteral("ion4-ios-volume-off");
+        }
+
+        if (mediaPlayer != null) {
+            mediaPlayer.setVolume(volumeAtual);
+        }
+    }
 
     @FXML
     private void handleNewPlaylistAction(ActionEvent event) {
@@ -137,14 +178,17 @@ public class MainController {
     private void handlePlayAction(ActionEvent event) {
         if (mediaPlayer == null) {
             btnPlay.setSelected(false);
+            tocando.set(false);
             return;
         }
 
         if (btnPlay.isSelected()) {
             mediaPlayer.play();
+            tocando.set(true);
             iconPlay.setIconLiteral("ion4-ios-pause");
         } else {
             mediaPlayer.pause();
+            tocando.set(false);
             iconPlay.setIconLiteral("ion4-ios-play");
         }
     }
@@ -162,14 +206,30 @@ public class MainController {
     public void tocarMusica(Musica musica) {
         if (musica == null) return;
 
-        //se ja estiver tocando uma musica, para para dar os recursos para outra que for torcar
+        // Se a música clicada já é a que está tocando, alterna entre play/pause
+        if (musicaAtual.get() != null && musicaAtual.get().equals(musica)) {
+            if (tocando.get()) {
+                mediaPlayer.pause();
+                tocando.set(false);
+                btnPlay.setSelected(false);
+                iconPlay.setIconLiteral("ion4-ios-play");
+            } else {
+                mediaPlayer.play();
+                tocando.set(true);
+                btnPlay.setSelected(true);
+                iconPlay.setIconLiteral("ion4-ios-pause");
+            }
+            return;
+        }
+
+        // Se ja estiver tocando uma musica diferente, para para dar os recursos para outra que for tocar
         if (mediaPlayer != null) {
             mediaPlayer.stop();
             mediaPlayer.dispose();
         }
 
         try {
-            this.musicaAtual = musica;
+            this.musicaAtual.set(musica);
             File file = new File(musica.getCaminho());
             Media media = new Media(file.toURI().toString());
             mediaPlayer = new MediaPlayer(media);
@@ -177,6 +237,7 @@ public class MainController {
             lblTitulo.setText(musica.getTitulo());
             lblArtista.setText(musica.getArtista());
             btnPlay.setSelected(true);
+            tocando.set(true);
             iconPlay.setIconLiteral("ion4-ios-pause");
 
             mediaPlayer.setOnReady(() -> {
@@ -210,6 +271,7 @@ public class MainController {
 
             mediaPlayer.setOnEndOfMedia(this::tocarProximaMusica);
 
+            mediaPlayer.setVolume(volumeAtual);
             mediaPlayer.play();
 
         } catch (Exception e) {
@@ -218,7 +280,7 @@ public class MainController {
     }
 
     private void tocarProximaMusica() {
-        if (gerenciadorEstruturas == null || musicaAtual == null) return;
+        if (gerenciadorEstruturas == null || musicaAtual.get() == null) return;
 
         Set<Musica> biblioteca = gerenciadorEstruturas.getBibliotecaGeral();
         boolean encontrouAtual = false;
@@ -228,7 +290,7 @@ public class MainController {
                 tocarMusica(m);
                 return;
             }
-            if (m.equals(musicaAtual)) {
+            if (m.equals(musicaAtual.get())) {
                 encontrouAtual = true;
             }
         }
@@ -236,13 +298,13 @@ public class MainController {
     }
 
     private void tocarMusicaAnterior() {
-        if (gerenciadorEstruturas == null || musicaAtual == null) return;
+        if (gerenciadorEstruturas == null || musicaAtual.get() == null) return;
 
         Set<Musica> biblioteca = gerenciadorEstruturas.getBibliotecaGeral();
         Musica anterior = null;
 
         for (Musica m : biblioteca) {
-            if (m.equals(musicaAtual)) {
+            if (m.equals(musicaAtual.get())) {
                 if (anterior != null) {
                     tocarMusica(anterior);
                 }
@@ -332,5 +394,45 @@ public class MainController {
     @FXML
     public void initialize() {
         loadView("main_home");
+
+        sliderTime.valueProperty().addListener((obs, oldVal, newVal) -> atualizaCorSlider(sliderTime));
+        sliderTime.maxProperty().addListener((obs, oldVal, newVal) -> atualizaCorSlider(sliderTime));
+
+        sliderVolume.valueProperty().addListener((obs, oldVal, newVal) -> {
+            volumeAtual = newVal.doubleValue() / 100.0;
+            if (mediaPlayer != null) {
+                mediaPlayer.setVolume(volumeAtual);
+            }
+
+            if (volumeAtual > 0) {
+                estaMudo = false;
+                if (volumeAtual > 0.5) {
+                    iconVolume.setIconLiteral("ion4-ios-volume-high");
+                } else {
+                    iconVolume.setIconLiteral("ion4-ios-volume-low");
+                }
+            } else {
+                estaMudo = true;
+                iconVolume.setIconLiteral("ion4-ios-volume-off");
+            }
+            atualizaCorSlider(sliderVolume);
+        });
+
+        javafx.application.Platform.runLater(() -> {
+            atualizaCorSlider(sliderVolume);
+            atualizaCorSlider(sliderTime);
+        });
+    }
+
+    private void atualizaCorSlider(Slider slider) {
+        javafx.scene.Node track = slider.lookup(".track");
+        if (track != null) {
+            double max = slider.getMax();
+            double val = slider.getValue();
+            double percentage = (max == 0) ? 0 : (val / max) * 100;
+            if (Double.isNaN(percentage) || Double.isInfinite(percentage)) percentage = 0;
+            String style = String.format(java.util.Locale.US, "-fx-background-color: linear-gradient(to right, #FF1493 0%%, #9370DB %.1f%%, #1a1a1a %.1f%%, #1a1a1a 100%%);", percentage, percentage);
+            track.setStyle(style);
+        }
     }
 }

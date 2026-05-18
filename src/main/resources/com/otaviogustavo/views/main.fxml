@@ -98,10 +98,19 @@
         </HBox>
         <HBox spacing="10" alignment="CENTER">
           <Label fx:id="lblTempoAtual" text="00:00" style="-fx-text-fill: white; -fx-font-size: 11px;"/>
-          <Slider fx:id="sliderTime" HBox.hgrow="ALWAYS" />
+          <Slider fx:id="sliderTime" HBox.hgrow="ALWAYS" styleClass="custom-slider" />
           <Label fx:id="lblTempoTotal" text="00:00" style="-fx-text-fill: white; -fx-font-size: 11px;"/>
         </HBox>
       </VBox>
+
+      <HBox spacing="10" alignment="CENTER_RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="0">
+        <Button fx:id="btnSilenciar" styleClass="button-player" onAction="#lidarComSilenciar">
+          <graphic>
+            <FontIcon fx:id="iconVolume" iconLiteral="ion4-ios-volume-high" iconSize="20"/>
+          </graphic>
+        </Button>
+        <Slider fx:id="sliderVolume" prefWidth="100" min="0" max="100" value="100" styleClass="custom-slider"/>
+      </HBox>
     </GridPane>
   </bottom>
 </BorderPane>
