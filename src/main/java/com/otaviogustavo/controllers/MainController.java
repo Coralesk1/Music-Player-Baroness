@@ -11,8 +11,9 @@ import com.google.gson.GsonBuilder;
 import com.otaviogustavo.App;
 
 import com.otaviogustavo.GerenciadorEstruturas;
-import com.otaviogustavo.Musica;
-import com.otaviogustavo.PlayList;
+import com.otaviogustavo.models.Musica;
+import com.otaviogustavo.models.PlayList;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;

@@ -1,4 +1,4 @@
-package com.otaviogustavo;
+package com.otaviogustavo.models;
 
 public class Musica {
 

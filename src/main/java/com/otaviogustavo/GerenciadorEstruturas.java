@@ -2,6 +2,9 @@ package com.otaviogustavo;
 
 import java.util.*;
 
+import com.otaviogustavo.models.Musica;
+import com.otaviogustavo.models.PlayList;
+
 public class GerenciadorEstruturas {
 
     private Set<Musica> bibliotecaGeral;

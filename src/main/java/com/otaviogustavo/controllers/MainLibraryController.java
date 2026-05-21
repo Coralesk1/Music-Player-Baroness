@@ -6,7 +6,8 @@ import com.mpatric.mp3agic.ID3v2;
 import com.mpatric.mp3agic.Mp3File;
 import com.otaviogustavo.GerenciadorEstruturas;
 import com.otaviogustavo.LibraryFilePaths;
-import com.otaviogustavo.Musica;
+import com.otaviogustavo.models.Musica;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;

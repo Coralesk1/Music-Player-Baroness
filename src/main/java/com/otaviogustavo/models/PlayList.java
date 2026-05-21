@@ -1,4 +1,4 @@
-package com.otaviogustavo;
+package com.otaviogustavo.models;
 
 import java.util.Objects;
 
@@ -7,7 +7,7 @@ public class PlayList {
     private String nome;
     private String descricao;
 
-    public PlayList() { // construtor vazio por causa do Gson conseguir fazer a deserialização do json
+    public PlayList() { // construtor vazio por causa do Gson conseguir fazer a deserializaï¿½ï¿½o do json
     }
 
     public PlayList(String nome, String descricao){
