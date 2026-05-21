@@ -114,6 +114,7 @@
 
 .dialog-field {
     -fx-background-color: transparent;
+    -fx-control-inner-background: #000000;
     -fx-border-color: transparent transparent #3e3e3e transparent;
     -fx-text-fill: white;
     -fx-prompt-text-fill: #727272;
@@ -263,3 +264,29 @@
     -fx-background-color: #1e1e1e;
     -fx-border-color: linear-gradient(to right, #ff33dd, #b233ff);
 }
+
+/* Select Playlist Dialog Styles */
+.playlist-list-view {
+    -fx-background-color: #181818;
+    -fx-border-color: #3e3e3e;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+}
+
+.playlist-list-view .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #b3b3b3;
+    -fx-padding: 8 12 8 12;
+    -fx-font-size: 14px;
+}
+
+.playlist-list-view .list-cell:hover {
+    -fx-background-color: #282828;
+    -fx-text-fill: white;
+}
+
+.playlist-list-view .list-cell:selected {
+    -fx-background-color: #3e3e3e;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}

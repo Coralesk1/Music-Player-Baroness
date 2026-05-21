@@ -6,13 +6,15 @@ public class PlayList {
 
     private String nome;
     private String descricao;
+    private String dtCriacao;
 
     public PlayList() { // construtor vazio por causa do Gson conseguir fazer a deserialização do json
     }
 
-    public PlayList(String nome, String descricao){
+    public PlayList(String nome, String descricao, String dtCriacao){
         this.nome = nome;
         this.descricao = descricao;
+        this.dtCriacao = dtCriacao;
     }
 
     public String getNome() {
@@ -29,6 +31,14 @@ public class PlayList {
 
     public void setDescricao(String descricao) {
         this.descricao = descricao;
+    }
+
+    public String getDtCriacao() {
+        return dtCriacao;
+    }
+
+    public void setDtCriacao(String dtCriacao) {
+        this.dtCriacao = dtCriacao;
     }
 
     @Override

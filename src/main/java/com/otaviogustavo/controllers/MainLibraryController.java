@@ -4,9 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mpatric.mp3agic.ID3v2;
 import com.mpatric.mp3agic.Mp3File;
-import com.otaviogustavo.GerenciadorEstruturas;
-import com.otaviogustavo.LibraryFilePaths;
-import com.otaviogustavo.Musica;
+import com.otaviogustavo.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -27,6 +25,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.paint.Color;
+import javafx.stage.Modality;
+import javafx.stage.StageStyle;
+import java.net.URL;
 
 
 public class MainLibraryController {
@@ -49,6 +55,7 @@ public class MainLibraryController {
     private Button btnOpenFolder;
 
     @FXML private TableView<Musica> tabelaMusicas;
+    @FXML private TableColumn<Musica, Void> colAdd;
     @FXML private TableColumn<Musica, Void> colPlay;
     @FXML private TableColumn<Musica, String> colTitulo;
     @FXML private TableColumn<Musica, String> colArtista;
@@ -65,6 +72,7 @@ public class MainLibraryController {
         colArtista.setCellValueFactory(new PropertyValueFactory<>("artista"));
         colDuracao.setCellValueFactory(new PropertyValueFactory<>("duracao"));
 
+        configurarColunaAdd();
         configurarColunaPlay();
 
         tabelaMusicas.setItems(listaMusicas);
@@ -288,5 +296,77 @@ public class MainLibraryController {
         if (mainController != null) {
             mainController.tocarMusica(musica);
         }
+    }
+
+    // método para criar um botão de adicionar à playlist para cada linha da tabela de música da biblioteca
+    private void configurarColunaAdd() {
+        colAdd.setCellFactory(column -> new TableCell<>() {
+            private final Button btnAddLocal = new Button();
+            private final FontIcon iconAdd = new FontIcon("ion4-ios-add");
+
+            {
+                btnAddLocal.getStyleClass().add("button-player");
+                iconAdd.setIconSize(24);
+                btnAddLocal.setGraphic(iconAdd);
+                btnAddLocal.setOnAction(event -> {
+                    Musica musica = getTableView().getItems().get(getIndex());
+                    abrirDialogoAdicionarPlaylist(musica);
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(btnAddLocal);
+                }
+            }
+        });
+    }
+
+    private void abrirDialogoAdicionarPlaylist(Musica musica) {
+        try {
+            URL fxmlLocation = App.class.getResource("/com/otaviogustavo/views/select_playlist_dialog.fxml");
+            FXMLLoader loader = new FXMLLoader(fxmlLocation);
+            Parent root = loader.load();
+
+            SelectPlaylistController controller = loader.getController();
+
+            // Passa as playlists existentes do gerenciador de estruturas
+            List<PlayList> listaPlaylists = new ArrayList<>();
+            if (gerenciadorEstruturas != null && gerenciadorEstruturas.getPlaylists() != null) {
+                listaPlaylists.addAll(gerenciadorEstruturas.getPlaylists().keySet());
+            }
+            controller.setPlaylists(listaPlaylists);
+
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initStyle(StageStyle.UNDECORATED);
+            stage.initOwner(tabelaMusicas.getScene().getWindow());
+
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add(App.class.getResource("/com/otaviogustavo/css/main.css").toExternalForm());
+            scene.setFill(Color.TRANSPARENT);
+            stage.setScene(scene);
+
+            stage.showAndWait();
+
+            if (controller.isConfirmed()) {
+                PlayList playlistSelecionada = controller.getSelectedPlaylist();
+                if (playlistSelecionada != null) {
+                    adicionarMusicaParaPlaylist(playlistSelecionada, musica);
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Erro ao abrir diálogo de seleção de playlist: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    public void adicionarMusicaParaPlaylist(PlayList playlist, Musica musica) {
+        // criar a lógica para adicionar a música à playlist
+        System.out.println("Método chamado para adicionar música '" + musica.getTitulo() + "' à playlist '" + playlist.getNome() + "'.");
     }
 }

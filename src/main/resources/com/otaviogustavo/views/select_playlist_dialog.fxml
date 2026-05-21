@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.otaviogustavo.controllers.SelectPlaylistController"
+      spacing="20" styleClass="dialog-container" prefWidth="400" prefHeight="350">
+    <padding>
+        <Insets top="25" right="25" bottom="25" left="25"/>
+    </padding>
+
+    <Label text="Adicionar à Playlist" styleClass="dialog-title"/>
+
+    <VBox spacing="10" VBox.vgrow="ALWAYS">
+        <Label text="Selecione uma playlist existente:" styleClass="field-label"/>
+        <ListView fx:id="lstPlaylists" VBox.vgrow="ALWAYS" />
+    </VBox>
+
+    <HBox spacing="10" alignment="BOTTOM_RIGHT" style="-fx-padding: 10 0 0 0;">
+        <Button text="Cancelar" fx:id="btnCancel" onAction="#handleCancel" styleClass="button-dialog-cancel"/>
+        <Button text="Adicionar" fx:id="btnSelect" onAction="#handleSelect" styleClass="button-dialog-create"/>
+    </HBox>
+</VBox>

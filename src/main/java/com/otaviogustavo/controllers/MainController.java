@@ -2,6 +2,9 @@ package com.otaviogustavo.controllers;
 
 import java.io.*;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -127,9 +130,14 @@ public class MainController {
 
                 String nome = mainPlaylistController.getTitulo();
                 String descricao = mainPlaylistController.getDescricao();
+                LocalDateTime dtAgora = LocalDateTime.now();
+
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+                String dtCriacao = dtAgora.format(formatter);
+
                 System.out.println("Nova playlist criada: " + nome + " - " + descricao);
 
-                gerenciadorEstruturas.criaPlaylistVazia(new PlayList(nome, descricao));
+                gerenciadorEstruturas.criaPlaylistVazia(new PlayList(nome, descricao, dtCriacao));
 
                 Map<PlayList, List<Musica>> playlist =  gerenciadorEstruturas.getPlaylists();
 

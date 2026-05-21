@@ -15,6 +15,7 @@
 
     <TableView fx:id="tabelaMusicas" VBox.vgrow="ALWAYS" styleClass="musica-table">
         <columns>
+            <TableColumn fx:id="colAdd" prefWidth="50" resizable="false" sortable="false" />
             <TableColumn fx:id="colPlay" prefWidth="50" resizable="false" sortable="false" />
             <TableColumn fx:id="colTitulo" text="Título" prefWidth="300" />
             <TableColumn fx:id="colArtista" text="Artista" prefWidth="150" />

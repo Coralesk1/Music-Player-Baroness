@@ -68,7 +68,7 @@
       </columnConstraints>
 
       <HBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="0">
-        <Rectangle width="32" height="32" fill="green"/>
+        <Rectangle width="32" height="32" fill="black"/>
         <VBox alignment="CENTER_LEFT">
           <Label fx:id="lblTitulo" text="Selecione uma música" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
           <Label fx:id="lblArtista" text="Artista" style="-fx-text-fill: white; -fx-font-size: 11px;"/>

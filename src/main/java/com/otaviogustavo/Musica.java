@@ -78,24 +78,4 @@ public class Musica {
                 ", caminho='" + caminho + '\'' +
                 '}';
     }
-
-    /*
-
-    Explica��o do funcionamento interno do java em estruturas como LinkedHashSet que estamos usando.
-
-    * Tentou adicionar uma M�sica no Set
-          ?
-          ?
-1. Chama o 'hashCode()' da m�sica para calcular a "gaveta" (n�mero hash).
-          ?
-          ??? Gaveta est� VAZIA? ??? Guarda a m�sica l�. (Fim! O 'equals' nem foi chamado).
-          ?
-          ??? Gaveta est� OCUPADA? (Colis�o de hash)
-                    ?
-                    ?
-               2. O Set chama o 'equals()' para comparar a m�sica nova
-                  com a(s) m�sica(s) que j� est�o dentro daquela gaveta.
-                    ?
-                    ??? Retornou TRUE (Caminhos iguais) ??? Rejeita (M�sica duplicada).
-                    ??? Retornou FALSE (Caminhos diferentes) ??? Adiciona na mesma gaveta.*/
 }
