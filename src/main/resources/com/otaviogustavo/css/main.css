@@ -263,3 +263,11 @@
     -fx-background-color: #1e1e1e;
     -fx-border-color: linear-gradient(to right, #ff33dd, #b233ff);
 }
+
+/* Sliding Panel Style */
+.sliding-panel {
+    -fx-background-color: #181818;
+    -fx-border-color: #282828 transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 15, 0, 0, -5);
+}

@@ -29,6 +29,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.shape.Rectangle;
+import javafx.animation.TranslateTransition;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
@@ -57,11 +61,17 @@ public class MainController {
         this.gerenciadorEstruturas = gerenciadorEstruturas;
     }
 
+    @FXML private StackPane centerStack;
     @FXML private VBox contentArea;
     @FXML private ToggleButton btnHome;
     @FXML private ToggleButton btnLibrary;
     @FXML private ComboBox<String> comboPlaylists;
     @FXML private Button btnNewPlaylist;
+    
+    @FXML private VBox slidingPanel;
+    @FXML private ToggleButton btnTogglePanel;
+
+    private TranslateTransition painelTransition;
 
     @FXML private ToggleButton btnPlay;
     @FXML private Button btnNext;
@@ -393,8 +403,43 @@ public class MainController {
     }
 
     @FXML
+    private void handleTogglePanel(ActionEvent event) {
+        boolean abrir = btnTogglePanel.isSelected();
+
+        if (painelTransition != null) {
+            painelTransition.stop();
+        }
+
+        // Obtém a altura real do painel central para o deslocamento dinâmico
+        double height = centerStack.getHeight();
+
+        if (abrir) {
+            slidingPanel.setVisible(true);
+            // Inicia deslocado totalmente para baixo
+            slidingPanel.setTranslateY(height);
+            
+            painelTransition = new TranslateTransition(Duration.millis(350), slidingPanel);
+            painelTransition.setToY(0);
+            painelTransition.play();
+        } else {
+            painelTransition = new TranslateTransition(Duration.millis(350), slidingPanel);
+            painelTransition.setToY(height);
+            painelTransition.setOnFinished(e -> slidingPanel.setVisible(false));
+            painelTransition.play();
+        }
+    }
+
+    @FXML
     public void initialize() {
         loadView("main_home");
+
+        // Criar máscara de recorte para garantir que o painel deslizante não transborde a área central
+        Rectangle clip = new Rectangle();
+        centerStack.setClip(clip);
+        centerStack.layoutBoundsProperty().addListener((obs, oldVal, newVal) -> {
+            clip.setWidth(newVal.getWidth());
+            clip.setHeight(newVal.getHeight());
+        });
 
         sliderTime.valueProperty().addListener((obs, oldVal, newVal) -> atualizaCorSlider(sliderTime));
         sliderTime.maxProperty().addListener((obs, oldVal, newVal) -> atualizaCorSlider(sliderTime));

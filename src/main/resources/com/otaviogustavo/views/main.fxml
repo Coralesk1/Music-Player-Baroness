@@ -53,8 +53,35 @@
   </left>
 
   <center>
-    <VBox fx:id="contentArea" style="-fx-background-color: #272727ff">
-    </VBox>
+    <StackPane fx:id="centerStack" style="-fx-background-color: #272727ff;">
+      <children>
+        <VBox fx:id="contentArea">
+        </VBox>
+        
+        <!-- Slide-up Panel -->
+        <VBox fx:id="slidingPanel" visible="false" maxHeight="Infinity" styleClass="sliding-panel" StackPane.alignment="BOTTOM_CENTER">
+          <children>
+            <VBox spacing="10" style="-fx-padding: 20px;" alignment="CENTER_LEFT">
+              <children>
+                <Label text="Fila de Reprodução" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 18px; -fx-padding: 0 0 10 0;"/>
+                <Label text="Próxima música:" style="-fx-text-fill: #b3b3b3; -fx-font-size: 12px;"/>
+                <HBox alignment="CENTER_LEFT" spacing="15" style="-fx-background-color: #282828; -fx-padding: 15px; -fx-background-radius: 8px;" maxWidth="Infinity">
+                  <children>
+                    <Rectangle width="40" height="40" fill="#FF1493"/>
+                    <VBox spacing="3">
+                      <children>
+                        <Label text="Fila de reprodução vazia" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px;"/>
+                        <Label text="A reprodução seguirá a ordem da biblioteca." style="-fx-text-fill: #b3b3b3; -fx-font-size: 11px;"/>
+                      </children>
+                    </VBox>
+                  </children>
+                </HBox>
+              </children>
+            </VBox>
+          </children>
+        </VBox>
+      </children>
+    </StackPane>
   </center>
 
   <bottom>
@@ -110,6 +137,11 @@
           </graphic>
         </Button>
         <Slider fx:id="sliderVolume" prefWidth="100" min="0" max="100" value="100" styleClass="custom-slider"/>
+        <ToggleButton fx:id="btnTogglePanel" styleClass="button-player" onAction="#handleTogglePanel">
+          <graphic>
+            <FontIcon fx:id="iconTogglePanel" iconLiteral="ion4-ios-menu" iconSize="20"/>
+          </graphic>
+        </ToggleButton>
       </HBox>
     </GridPane>
   </bottom>
