@@ -10,6 +10,7 @@ module com.otaviogustavo {
 
     opens com.otaviogustavo.controllers to javafx.fxml;
     opens com.otaviogustavo to com.google.gson;
+    opens com.otaviogustavo.models to com.google.gson;
     exports com.otaviogustavo;
 
 }
