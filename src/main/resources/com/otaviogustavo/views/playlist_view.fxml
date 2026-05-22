@@ -1,21 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
 
-<VBox xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" spacing="20" fx:controller="com.otaviogustavo.controllers.MainLibraryController">
+<VBox xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" spacing="20" fx:controller="com.otaviogustavo.controllers.MainPlaylistController">
     <padding>
         <Insets top="40" right="40" bottom="40" left="40"/>
     </padding>
-    <HBox alignment="CENTER_LEFT">
-        <Label text="Sua Biblioteca" style="-fx-text-fill: white; -fx-font-size: 32px; -fx-font-weight: bold;"/>
-        <Pane HBox.hgrow="ALWAYS"/>
-        <Button fx:id="btnOpenFolder" text="Adicionar pasta" onAction="#abrirJanelaArquivos" styleClass="button-add-folder"/>
-    </HBox>
 
+    <!-- Cabeçalho da Playlist -->
+    <VBox spacing="10" style="-fx-padding: 0 0 10 0;">
+        <Label fx:id="lblPlaylistNome" text="Nome da Playlist" style="-fx-text-fill: white; -fx-font-size: 32px; -fx-font-weight: bold;"/>
+        <Label fx:id="lblPlaylistDescricao" text="Descrição da playlist" style="-fx-text-fill: #b3b3b3; -fx-font-size: 14px;"/>
+        <Label fx:id="lblPlaylistData" text="Criada em: " style="-fx-text-fill: #727272; -fx-font-size: 12px;"/>
+    </VBox>
+
+    <!-- Tabela de Músicas da Playlist -->
     <TableView fx:id="tabelaMusicas" VBox.vgrow="ALWAYS" styleClass="musica-table">
         <columns>
-            <TableColumn fx:id="colAdd" prefWidth="50" resizable="false" sortable="false" />
             <TableColumn fx:id="colPlay" prefWidth="50" resizable="false" sortable="false" />
             <TableColumn fx:id="colTitulo" text="Título" prefWidth="300" />
             <TableColumn fx:id="colArtista" text="Artista" prefWidth="150" />

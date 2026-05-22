@@ -4,7 +4,6 @@ import java.io.*;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -55,7 +54,7 @@ public class MainController {
         return musicaAtual;
     }
 
-    public void setGerenciador(GerenciadorEstruturas gerenciadorEstruturas) {
+    public void definirGerenciador(GerenciadorEstruturas gerenciadorEstruturas) {
         this.gerenciadorEstruturas = gerenciadorEstruturas;
     }
 
@@ -105,7 +104,7 @@ public class MainController {
     }
 
     @FXML
-    private void handleNewPlaylistAction(ActionEvent event) {
+    private void lidarComNovaPlaylist(ActionEvent event) {
         try {
 
             URL fxmlLocation = App.class.getResource("/com/otaviogustavo/views/create_playlist_dialog.fxml");
@@ -126,7 +125,7 @@ public class MainController {
 
             stage.showAndWait();
 
-            if (mainPlaylistController.isCriado()) {
+            if (mainPlaylistController.estaCriado()) {
 
                 String nome = mainPlaylistController.getTitulo();
                 String descricao = mainPlaylistController.getDescricao();
@@ -137,7 +136,7 @@ public class MainController {
 
                 System.out.println("Nova playlist criada: " + nome + " - " + descricao);
 
-                gerenciadorEstruturas.criaPlaylistVazia(new PlayList(nome, descricao, dtCriacao));
+                gerenciadorEstruturas.adicionaPlaylistVazia(new PlayList(nome, descricao, dtCriacao));
 
                 Map<PlayList, List<Musica>> playlist =  gerenciadorEstruturas.getPlaylists();
 
@@ -151,7 +150,7 @@ public class MainController {
                         System.out.println("Playlist salva com sucesso em PlayLists.json!");
 
                     } catch (IOException e) {
-                        System.err.println("Erro ao salvar playlist:" + e.getMessage());
+                        System.err.println("Erro ao salvar playlist no json:" + e.getMessage());
                         e.printStackTrace();
                     }
 
@@ -161,13 +160,14 @@ public class MainController {
 
             }
 
-        } catch (IOException e) {
+        } catch (Exception e) {
+            System.out.println("Erro ao salvar playlist");
             e.printStackTrace();
         }
     }
 
     @FXML
-    private void handleMenuAction(ActionEvent event) {
+    private void lidarComAcaoMenu(ActionEvent event) {
         ToggleButton selectedButton = (ToggleButton) event.getSource();
         String fxml = "";
 
@@ -178,12 +178,12 @@ public class MainController {
         }
 
         if (!fxml.isEmpty()) {
-            loadView(fxml);
+            carregarView(fxml);
         }
     }
 
     @FXML
-    private void handlePlayAction(ActionEvent event) {
+    private void lidarComAcaoPlay(ActionEvent event) {
         if (mediaPlayer == null) {
             btnPlay.setSelected(false);
             tocando.set(false);
@@ -202,12 +202,12 @@ public class MainController {
     }
 
     @FXML
-    private void handleNextAction(ActionEvent event) {
+    private void lidarComAcaoProxima(ActionEvent event) {
         tocarProximaMusica();
     }
 
     @FXML
-    private void handlePreviousAction(ActionEvent event) {
+    private void lidarComAcaoAnterior(ActionEvent event) {
         tocarMusicaAnterior();
     }
 
@@ -329,9 +329,9 @@ public class MainController {
         return String.format("%02d:%02d", minutos, segundos);
     }
 
-    private void loadView(String fxml) {
+    private void carregarView(String fxml) {
 
-        carregaComboPlaylist();
+        carregarPlaylistsDoJson();
 
         try {
 
@@ -347,15 +347,16 @@ public class MainController {
 
             if (subController instanceof MainLibraryController) {
                 MainLibraryController libraryController = (MainLibraryController) subController;
-                libraryController.setGerenciador(this.gerenciadorEstruturas);
-                libraryController.setMainController(this);
+
+                libraryController.definirGerenciador(this.gerenciadorEstruturas);
+                libraryController.definirMainController(this);
             }
 
-            /*if (subController instanceof MainPlaylistController) {
+            if (subController instanceof MainPlaylistController) {
                 MainPlaylistController mainPlaylistController = (MainPlaylistController) subController;
-                mainPlaylistController.setGerenciador(this.gerenciadorEstruturas);
-                mainPlaylistController.setMainController(this);
-            }*/
+                mainPlaylistController.definirGerenciador(this.gerenciadorEstruturas);
+                mainPlaylistController.definirMainController(this);
+            }
 
             contentArea.getChildren().setAll(root);
 
@@ -365,7 +366,7 @@ public class MainController {
         }
     }
 
-    private void carregaComboPlaylist(){
+    private void carregarPlaylistsDoJson(){
 
         File arquivoJson = new File("PlayLists.json");
 
@@ -383,7 +384,7 @@ public class MainController {
                 comboPlaylists.getItems().clear();
                 this.gerenciadorEstruturas = dados;
             }
-            atualizaComboBoxPlaylist();
+            atualizarComboBoxPlaylist();
 
         } catch (IOException e) {
             System.err.println("Erro ao carregar o arquivo JSON: " + arquivoJson);
@@ -391,7 +392,7 @@ public class MainController {
         }
     }
 
-    private void atualizaComboBoxPlaylist(){
+    private void atualizarComboBoxPlaylist(){
         if (gerenciadorEstruturas != null){
             gerenciadorEstruturas.getPlaylists().keySet().forEach(playlist -> {
                 comboPlaylists.getItems().add(playlist.getNome());
@@ -401,7 +402,7 @@ public class MainController {
 
     @FXML
     public void initialize() {
-        loadView("main_home");
+        carregarView("main_home");
 
         sliderTime.valueProperty().addListener((obs, oldVal, newVal) -> atualizaCorSlider(sliderTime));
         sliderTime.maxProperty().addListener((obs, oldVal, newVal) -> atualizaCorSlider(sliderTime));
@@ -443,4 +444,68 @@ public class MainController {
             track.setStyle(style);
         }
     }
+
+    private boolean carregando = false;
+
+    @FXML
+    private void lidarComSelecaoPlaylist(ActionEvent event) {
+        if (carregando) {
+            return;
+        }
+
+        String nomePlaylist = comboPlaylists.getValue();
+        if (nomePlaylist == null || nomePlaylist.isEmpty()) {
+            return;
+        }
+
+        carregando = true;
+        try {
+            // Recarrega as playlists do JSON para garantir que temos as músicas mais recentes
+            carregarPlaylistsDoJson();
+
+            // Garante que o ComboBox mantenha o valor selecionado após o recarregamento
+            comboPlaylists.setValue(nomePlaylist);
+
+            PlayList playlistSelecionada = null;
+            if (gerenciadorEstruturas != null) {
+                for (PlayList pl : gerenciadorEstruturas.getPlaylists().keySet()) {
+                    if (pl.getNome().equals(nomePlaylist)) {
+                        playlistSelecionada = pl;
+                        break;
+                    }
+                }
+            }
+
+            if (playlistSelecionada != null) {
+                carregarTelaPlaylist(playlistSelecionada);
+            }
+        } finally {
+            carregando = false;
+        }
+    }
+
+    private void carregarTelaPlaylist(PlayList playlist) {
+        try {
+            URL fxmlLocation = App.class.getResource("/com/otaviogustavo/views/playlist_view.fxml");
+            if (fxmlLocation == null) {
+                System.err.println("Erro ao encontrar o arquivo FXML para visualizacao de playlist.");
+                return;
+            }
+
+            FXMLLoader loader = new FXMLLoader(fxmlLocation);
+            Parent root = loader.load();
+            Object subController = loader.getController();
+
+            if (subController instanceof MainPlaylistController) {
+                MainPlaylistController mainPlaylistController = (MainPlaylistController) subController;
+                mainPlaylistController.definirPlaylist(playlist, this.gerenciadorEstruturas, this);
+            }
+
+            contentArea.getChildren().setAll(root);
+        } catch (IOException e) {
+            System.err.println("Erro ao carregar a tela da playlist: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
 }

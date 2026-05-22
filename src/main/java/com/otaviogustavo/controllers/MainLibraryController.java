@@ -33,6 +33,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.StageStyle;
 import java.net.URL;
+import java.util.Map;
 
 
 public class MainLibraryController {
@@ -40,27 +41,35 @@ public class MainLibraryController {
     private MainController mainController;
     private GerenciadorEstruturas gerenciadorEstruturas;
 
-    public void setGerenciador(GerenciadorEstruturas gerenciadorEstruturas) {
+    public void definirGerenciador(GerenciadorEstruturas gerenciadorEstruturas) {
         this.gerenciadorEstruturas = gerenciadorEstruturas;
 
-        carregarListFileLibraryJson();
-        atualizarTabela();
+        carregarBibliotecaDoJson();
+        atualizarTabelaBiblioteca();
     }
 
-    public void setMainController(MainController mainController) {
+    public void definirMainController(MainController mainController) {
         this.mainController = mainController;
     }
+
 
     @FXML
     private Button btnOpenFolder;
 
-    @FXML private TableView<Musica> tabelaMusicas;
-    @FXML private TableColumn<Musica, Void> colAdd;
-    @FXML private TableColumn<Musica, Void> colPlay;
-    @FXML private TableColumn<Musica, String> colTitulo;
-    @FXML private TableColumn<Musica, String> colArtista;
-    @FXML private TableColumn<Musica, String> colAlbum;
-    @FXML private TableColumn<Musica, String> colDuracao;
+    @FXML
+    private TableView<Musica> tabelaMusicas;
+    @FXML
+    private TableColumn<Musica, Void> colAdd;
+    @FXML
+    private TableColumn<Musica, Void> colPlay;
+    @FXML
+    private TableColumn<Musica, String> colTitulo;
+    @FXML
+    private TableColumn<Musica, String> colArtista;
+    @FXML
+    private TableColumn<Musica, String> colAlbum;
+    @FXML
+    private TableColumn<Musica, String> colDuracao;
 
     private ObservableList<Musica> listaMusicas = FXCollections.observableArrayList();
 
@@ -90,12 +99,11 @@ public class MainLibraryController {
     }
 
     @FXML
-    public void abreJanelaArquivos(ActionEvent actionEvent){
+    public void abrirJanelaArquivos(ActionEvent actionEvent) {
 
         DirectoryChooser directoryChooser = new DirectoryChooser();
         List<String> listaCaminhos = new ArrayList<>();
         LibraryFilePaths libraryData = new LibraryFilePaths();
-
 
         directoryChooser.setTitle("Selecionar Pasta");
         directoryChooser.setInitialDirectory(new File(System.getProperty("user.home")));
@@ -115,19 +123,19 @@ public class MainLibraryController {
             if (pastaArquivos != null) {
 
                 for (File file : pastaArquivos) {
-                    if (file.isFile() && (file.getName().endsWith(".mp3") || file.getName().endsWith(".wav"))){
+                    if (file.isFile() && (file.getName().endsWith(".mp3") || file.getName().endsWith(".wav"))) {
 
                         Musica musica = lerMetadados(file);
 
-                        if (musica != null){
+                        if (musica != null) {
                             gerenciadorEstruturas.adicionarMusicaBiblioteca(musica);
                             listaCaminhos.add(file.getAbsolutePath());
                         }
                     }
                 }
-                atualizarTabela();
+                atualizarTabelaBiblioteca();
 
-                if (listaCaminhos != null){
+                if (listaCaminhos != null) {
                     libraryData.setListaCaminhos(listaCaminhos);
 
                     Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -194,7 +202,7 @@ public class MainLibraryController {
         return new Musica(titulo, artista, duracao, caminho);
     }
 
-    private void carregarListFileLibraryJson() {
+    private void carregarBibliotecaDoJson() {
         File arquivoJson = new File("LibraryFilePath.json");
 
         if (!arquivoJson.exists()) {
@@ -221,7 +229,7 @@ public class MainLibraryController {
                         }
                     }
                 }
-                atualizarTabela();
+                atualizarTabelaBiblioteca();
                 System.out.println("Biblioteca carregada do JSON!");
             }
         } catch (IOException e) {
@@ -230,7 +238,7 @@ public class MainLibraryController {
         }
     }
 
-    private void atualizarTabela() {
+    private void atualizarTabelaBiblioteca() {
         if (gerenciadorEstruturas != null) {
             listaMusicas.setAll(gerenciadorEstruturas.getBibliotecaGeral());
         }
@@ -282,8 +290,8 @@ public class MainLibraryController {
 
             private void atualizarIcone(Musica musicaDaLinha) {
                 if (mainController.musicaAtualProperty().get() != null &&
-                    mainController.musicaAtualProperty().get().equals(musicaDaLinha) &&
-                    mainController.tocandoProperty().get()) {
+                        mainController.musicaAtualProperty().get().equals(musicaDaLinha) &&
+                        mainController.tocandoProperty().get()) {
                     iconPlay.setIconLiteral("ion4-ios-pause");
                 } else {
                     iconPlay.setIconLiteral("ion4-ios-play");
@@ -300,6 +308,7 @@ public class MainLibraryController {
 
     // método para criar um botão de adicionar à playlist para cada linha da tabela de música da biblioteca
     private void configurarColunaAdd() {
+
         colAdd.setCellFactory(column -> new TableCell<>() {
             private final Button btnAddLocal = new Button();
             private final FontIcon iconAdd = new FontIcon("ion4-ios-add");
@@ -354,9 +363,11 @@ public class MainLibraryController {
             stage.showAndWait();
 
             if (controller.isConfirmed()) {
+
                 PlayList playlistSelecionada = controller.getSelectedPlaylist();
+
                 if (playlistSelecionada != null) {
-                    adicionarMusicaParaPlaylist(playlistSelecionada, musica);
+                    adicionarMusicaEstruturaEJson(playlistSelecionada, musica);
                 }
             }
         } catch (IOException e) {
@@ -365,8 +376,35 @@ public class MainLibraryController {
         }
     }
 
-    public void adicionarMusicaParaPlaylist(PlayList playlist, Musica musica) {
-        // criar a lógica para adicionar a música à playlist
-        System.out.println("Método chamado para adicionar música '" + musica.getTitulo() + "' à playlist '" + playlist.getNome() + "'.");
+    public void adicionarMusicaEstruturaEJson(PlayList playlist, Musica musica) {
+
+        try {
+
+            gerenciadorEstruturas.adicionarMusicaPLaylist(playlist, musica);
+
+            Map<PlayList, List<Musica>> playlistMusica =  gerenciadorEstruturas.getPlaylists();
+
+            if (playlistMusica != null){
+
+                Gson gson = new GsonBuilder().enableComplexMapKeySerialization().setPrettyPrinting().create();
+
+                // Grava o arquivo de configuração na raiz do projeto
+                try (FileWriter writer = new FileWriter("PlayLists.json")) {
+                    gson.toJson(gerenciadorEstruturas, writer);
+
+                    System.out.println("Playlist com musica salva com sucesso em PlayLists.json!");
+
+                } catch (IOException e) {
+                    System.err.println("Erro ao salvar musica no json:" + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+
+        } catch (Exception e) {
+            System.out.println("Erro ao salvar musica da plalist:" + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
+
+

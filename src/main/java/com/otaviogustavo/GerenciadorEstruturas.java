@@ -28,14 +28,13 @@ public class GerenciadorEstruturas {
         playlists.put(playlist.getKey(), playlist.getValue());
     }
 
-    public void criaPlaylistVazia(PlayList playList){
+    public void adicionaPlaylistVazia(PlayList playList){
         playlists.put(playList, new ArrayList<>());
     }
 
     public void adicionarMusicaPLaylist(PlayList playList, Musica musica){
         playlists.get(playList).add(musica);
     }
-
 
 }
 
