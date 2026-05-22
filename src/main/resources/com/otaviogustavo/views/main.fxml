@@ -29,24 +29,24 @@
         <fx:define>
           <ToggleGroup fx:id="menuGroup"/>
         </fx:define>
-        <ToggleButton fx:id="btnHome" text="Início" maxWidth="Infinity" styleClass="button-menu" alignment="CENTER_LEFT" toggleGroup="$menuGroup" selected="true" onAction="#handleMenuAction">
+        <ToggleButton fx:id="btnHome" text="Início" maxWidth="Infinity" styleClass="button-menu" alignment="CENTER_LEFT" toggleGroup="$menuGroup" selected="true" onAction="#lidarComAcaoMenu">
           <graphic>
             <FontIcon iconLiteral="ion4-md-home" iconSize="20"/>
           </graphic>
         </ToggleButton>
-        <ToggleButton fx:id="btnLibrary" text="Sua Biblioteca" maxWidth="Infinity" styleClass="button-menu" alignment="CENTER_LEFT" toggleGroup="$menuGroup" onAction="#handleMenuAction">
+        <ToggleButton fx:id="btnLibrary" text="Sua Biblioteca" maxWidth="Infinity" styleClass="button-menu" alignment="CENTER_LEFT" toggleGroup="$menuGroup" onAction="#lidarComAcaoMenu">
           <graphic>
             <FontIcon iconLiteral="ion4-md-albums" iconSize="20"/>
           </graphic>
         </ToggleButton>
         <VBox spacing="5" style="-fx-padding: 10 0 0 0;">
-           <Button fx:id="btnNewPlaylist" text="Nova Playlist" maxWidth="Infinity" styleClass="button-menu" alignment="CENTER_LEFT" onAction="#handleNewPlaylistAction">
+           <Button fx:id="btnNewPlaylist" text="Nova Playlist" maxWidth="Infinity" styleClass="button-menu" alignment="CENTER_LEFT" onAction="#lidarComNovaPlaylist">
              <graphic>
                <FontIcon iconLiteral="ion4-md-add" iconSize="20"/>
              </graphic>
            </Button>
            <Label text="Playlists" style="-fx-text-fill: #b3b3b3; -fx-font-size: 12px; -fx-font-weight: bold; -fx-padding: 10 0 5 15;"/>
-           <ComboBox fx:id="comboPlaylists" promptText="Selecionar Playlist" maxWidth="Infinity" styleClass="combo-playlists"/>
+           <ComboBox fx:id="comboPlaylists" promptText="Selecionar Playlist" maxWidth="Infinity" styleClass="combo-playlists" onAction="#lidarComSelecaoPlaylist"/>
         </VBox>
       </VBox>
     </VBox>
@@ -68,7 +68,7 @@
       </columnConstraints>
 
       <HBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="0">
-        <Rectangle width="32" height="32" fill="green"/>
+        <Rectangle width="32" height="32" fill="black"/>
         <VBox alignment="CENTER_LEFT">
           <Label fx:id="lblTitulo" text="Selecione uma música" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
           <Label fx:id="lblArtista" text="Artista" style="-fx-text-fill: white; -fx-font-size: 11px;"/>
@@ -78,19 +78,19 @@
       <VBox spacing="5" alignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="0">
         <HBox styleClass="player-controls-container" spacing="10" alignment="CENTER" maxWidth="Infinity">
           <!-- Botão Voltar -->
-          <Button fx:id="btnPrevious" styleClass="button-player" onAction="#handlePreviousAction">
+          <Button fx:id="btnPrevious" styleClass="button-player" onAction="#lidarComAcaoAnterior">
             <graphic>
               <FontIcon iconLiteral="ion4-ios-skip-backward" iconSize="20"/>
             </graphic>
           </Button>
           <!-- Botão Play -->
-          <ToggleButton fx:id="btnPlay" styleClass="button-player" onAction="#handlePlayAction">
+          <ToggleButton fx:id="btnPlay" styleClass="button-player" onAction="#lidarComAcaoPlay">
             <graphic>
               <FontIcon fx:id="iconPlay" iconLiteral="ion4-ios-play" iconSize="24"/>
             </graphic>
           </ToggleButton>
           <!-- Botão Avançar -->
-          <Button fx:id="btnNext" styleClass="button-player" onAction="#handleNextAction">
+          <Button fx:id="btnNext" styleClass="button-player" onAction="#lidarComAcaoProxima">
             <graphic>
               <FontIcon iconLiteral="ion4-ios-skip-forward" iconSize="20"/>
             </graphic>

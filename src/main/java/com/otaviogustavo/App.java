@@ -31,11 +31,12 @@ public class App extends Application {
         stage.getIcons().add(
                 new Image(getClass().getResourceAsStream("/com/otaviogustavo/images/icons/baroness.png")));
         stage.setScene(scene);
+        stage.setMaximized(true);
         stage.show();
     }
 
     public static void setRoot(String fxml) throws IOException {
-        // Se no futuro você trocar de tela usando setRoot, ele também injeta o gerenciador
+        // Se no futuro vocï¿½ trocar de tela usando setRoot, ele tambï¿½m injeta o gerenciador
         scene.setRoot(loadFXMLAndInject(fxml));
         loadStyle(fxml);
     }
@@ -58,7 +59,7 @@ public class App extends Application {
         return fxmlLoader.load();
     }
 
-    //Carrega o FXML, descobre quem é o controller e injeta o gerenciador
+    //Carrega o FXML, descobre quem ï¿½ o controller e injeta o gerenciador
     private static Parent loadFXMLAndInject(String fxml) throws IOException {
         URL fxmlLocation = App.class.getResource("views/" + fxml + ".fxml");
         if (fxmlLocation == null) {
@@ -72,7 +73,7 @@ public class App extends Application {
 
         // 1. ENTREGA O GERENCIADOR PARA O MAIN CONTROLLER!
         if (controller instanceof MainController) {
-            ((MainController) controller).setGerenciador(gerenciadorEstruturas);
+            ((MainController) controller).definirGerenciador(gerenciadorEstruturas);
         }
 
         return root;
