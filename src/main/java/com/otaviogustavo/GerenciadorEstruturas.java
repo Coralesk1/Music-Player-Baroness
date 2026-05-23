@@ -24,16 +24,16 @@ public class GerenciadorEstruturas {
         return playlists;
     }
 
-    public void setPlaylists(Map.Entry<PlayList, List<Musica>> playlist) {
-        playlists.put(playlist.getKey(), playlist.getValue());
-    }
-
     public void adicionaPlaylistVazia(PlayList playList){
         playlists.put(playList, new ArrayList<>());
     }
 
     public void adicionarMusicaPLaylist(PlayList playList, Musica musica){
         playlists.get(playList).add(musica);
+    }
+
+    public void removerPlaylist(String nome) {
+        playlists.keySet().removeIf(playlist -> playlist.getNome().equals(nome));
     }
 
 }

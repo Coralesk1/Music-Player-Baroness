@@ -46,6 +46,7 @@ public class MainPlaylistController {
     @FXML private TableColumn<Musica, Void> colPlay;
     @FXML private TableColumn<Musica, String> colTitulo;
     @FXML private TableColumn<Musica, String> colArtista;
+    @FXML private TableColumn<Musica, String> colAlbum;
     @FXML private TableColumn<Musica, String> colDuracao;
 
     private ObservableList<Musica> listaMusicas = FXCollections.observableArrayList();
@@ -64,6 +65,7 @@ public class MainPlaylistController {
             // Configura as colunas para buscar as propriedades do objeto Musica
             colTitulo.setCellValueFactory(new PropertyValueFactory<>("titulo"));
             colArtista.setCellValueFactory(new PropertyValueFactory<>("artista"));
+            colAlbum.setCellValueFactory(new PropertyValueFactory<>("album"));
             colDuracao.setCellValueFactory(new PropertyValueFactory<>("duracao"));
 
             // Configura a coluna que contém o botão de reproduzir

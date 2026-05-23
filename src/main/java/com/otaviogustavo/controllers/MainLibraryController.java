@@ -79,6 +79,7 @@ public class MainLibraryController {
         // Configura como cada coluna vai buscar o dado no objeto Musica
         colTitulo.setCellValueFactory(new PropertyValueFactory<>("titulo"));
         colArtista.setCellValueFactory(new PropertyValueFactory<>("artista"));
+        colAlbum.setCellValueFactory(new PropertyValueFactory<>("album"));
         colDuracao.setCellValueFactory(new PropertyValueFactory<>("duracao"));
 
         configurarColunaAdd();
@@ -92,6 +93,7 @@ public class MainLibraryController {
                 System.out.println("--- Música Selecionada ---");
                 System.out.println("Título: " + novoValor.getTitulo());
                 System.out.println("Artista: " + novoValor.getArtista());
+                System.out.println("Álbum: " + novoValor.getAlbum());
                 System.out.println("Duração: " + novoValor.getDuracao());
 
             }
@@ -163,8 +165,11 @@ public class MainLibraryController {
 
         String titulo = arquivoMp3.getName();
         String artista = "Artista Desconhecido";
+        String album = "Álbum Desconhecido";
+        String genero = "Gênero Desconhecido";
         String duracao = "00:00";
         String caminho = arquivoMp3.getAbsolutePath();
+        byte[] capa = null;
 
         try {
             // Carrega o arquivo MP3
@@ -187,11 +192,21 @@ public class MainLibraryController {
                 if (id3v2Tag.getArtist() != null && !id3v2Tag.getArtist().isBlank()) {
                     artista = id3v2Tag.getArtist();
                 }
+                if (id3v2Tag.getAlbum() != null && !id3v2Tag.getAlbum().isBlank()) {
+                    album = id3v2Tag.getAlbum();
+                }
+                if (id3v2Tag.getGenreDescription() != null && !id3v2Tag.getGenreDescription().isBlank()) {
+                    genero = id3v2Tag.getGenreDescription();
+                }
+                // Não carregamos a imagem aqui para evitar OutOfMemory
+                // capa = id3v2Tag.getAlbumImage();
             } else if (mp3File.hasId3v1Tag()) { // Se não tiver ID3v2, tenta ler o formato antigo ID3v1
 
                 var id3v1Tag = mp3File.getId3v1Tag();
                 if (id3v1Tag.getTitle() != null && !id3v1Tag.getTitle().isBlank()) titulo = id3v1Tag.getTitle();
                 if (id3v1Tag.getArtist() != null && !id3v1Tag.getArtist().isBlank()) artista = id3v1Tag.getArtist();
+                if (id3v1Tag.getAlbum() != null && !id3v1Tag.getAlbum().isBlank()) album = id3v1Tag.getAlbum();
+                if (id3v1Tag.getGenreDescription() != null && !id3v1Tag.getGenreDescription().isBlank()) genero = id3v1Tag.getGenreDescription();
             }
 
         } catch (Exception e) {
@@ -199,7 +214,7 @@ public class MainLibraryController {
             e.printStackTrace();
         }
 
-        return new Musica(titulo, artista, duracao, caminho);
+        return new Musica(titulo, artista, album, genero, duracao, caminho, capa);
     }
 
     private void carregarBibliotecaDoJson() {
