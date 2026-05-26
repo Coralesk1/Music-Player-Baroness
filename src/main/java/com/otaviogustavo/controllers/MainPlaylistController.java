@@ -1,8 +1,12 @@
 package com.otaviogustavo.controllers;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.otaviogustavo.GerenciadorEstruturas;
 import com.otaviogustavo.Musica;
 import com.otaviogustavo.PlayList;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -18,7 +22,11 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MainPlaylistController {
 
@@ -48,8 +56,14 @@ public class MainPlaylistController {
     @FXML private TableColumn<Musica, String> colArtista;
     @FXML private TableColumn<Musica, String> colAlbum;
     @FXML private TableColumn<Musica, String> colDuracao;
+    @FXML private TableColumn<Musica, Void> colExcluir;
 
     private ObservableList<Musica> listaMusicas = FXCollections.observableArrayList();
+    private Set<Musica> musicasPendentesExclusao = new HashSet<>();
+
+    public ObservableList<Musica> getListaMusicas() {
+        return listaMusicas;
+    }
 
     public void definirGerenciador(GerenciadorEstruturas gerenciadorEstruturas) {
         this.gerenciadorEstruturas = gerenciadorEstruturas;
@@ -70,6 +84,9 @@ public class MainPlaylistController {
 
             // Configura a coluna que contém o botão de reproduzir
             configurarColunaTocar();
+
+            // Configura a coluna que contém o botão de excluir
+            configurarColunaExcluir();
 
             tabelaMusicas.setItems(listaMusicas);
         }
@@ -155,6 +172,88 @@ public class MainPlaylistController {
         }
     }
 
+    private void configurarColunaExcluir() {
+        if (colExcluir == null) return;
+
+        colExcluir.setCellFactory(column -> new TableCell<>() {
+            private final Button btnExcluir = new Button();
+            private final FontIcon iconeLixeira = new FontIcon("ion4-ios-trash");
+
+            {
+                btnExcluir.getStyleClass().add("button-delete-playlist");
+                iconeLixeira.setIconSize(20);
+                btnExcluir.setGraphic(iconeLixeira);
+                btnExcluir.setOnAction(event -> {
+                    Musica musica = getTableView().getItems().get(getIndex());
+                    excluirMusicaDaPlaylist(musica);
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(btnExcluir);
+                }
+            }
+        });
+    }
+
+    private void excluirMusicaDaPlaylist(Musica musica) {
+        if (mainController != null && mainController.musicaAtualProperty().get() != null &&
+                mainController.musicaAtualProperty().get().equals(musica)) {
+
+            // Se a música está tocando e não está na lista de pendentes, adiciona
+            if (!musicasPendentesExclusao.contains(musica)) {
+                musicasPendentesExclusao.add(musica);
+
+                ChangeListener<Musica> listener = new ChangeListener<Musica>() {
+                    @Override
+                    public void changed(ObservableValue<? extends Musica> observable, Musica oldMusic, Musica newMusic) {
+                        // Quando mudar a música, removemos efetivamente a que estava pendente
+                        if (oldMusic != null && oldMusic.equals(musica) && !musica.equals(newMusic)) {
+                            removerMusicaEfetivamente(musica);
+                            musicasPendentesExclusao.remove(musica);
+                            mainController.musicaAtualProperty().removeListener(this);
+                        }
+                    }
+                };
+                mainController.musicaAtualProperty().addListener(listener);
+                System.out.println("Exclusão adiada. A música será removida quando a reprodução mudar ou terminar: " + musica.getTitulo());
+            }
+        } else {
+            // Se não for a música atual, remove imediatamente
+            removerMusicaEfetivamente(musica);
+        }
+    }
+
+    private void removerMusicaEfetivamente(Musica musica) {
+        if (playlist != null && gerenciadorEstruturas != null) {
+            gerenciadorEstruturas.removerMusicaPlaylist(playlist, musica);
+            listaMusicas.remove(musica);
+            salvarPlaylistsNoJson();
+        }
+    }
+
+    private void salvarPlaylistsNoJson() {
+        if (gerenciadorEstruturas != null) {
+
+            Gson gson = new GsonBuilder().enableComplexMapKeySerialization().setPrettyPrinting().create();
+
+            try (FileWriter writer = new FileWriter("PlayLists.json")) {
+
+                gson.toJson(gerenciadorEstruturas, writer);
+                System.out.println("Playlists salvas com sucesso em PlayLists.json!");
+
+            } catch (IOException e) {
+                System.err.println("Erro ao salvar playlist no json: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+
     private void configurarColunaTocar() {
         colPlay.setCellFactory(column -> new TableCell<>() {
             private final Button btnTocarLocal = new Button();
@@ -201,7 +300,8 @@ public class MainPlaylistController {
             private void atualizarIcone(Musica musicaDaLinha) {
                 if (mainController.musicaAtualProperty().get() != null &&
                         mainController.musicaAtualProperty().get().equals(musicaDaLinha) &&
-                        mainController.tocandoProperty().get()) {
+                        mainController.tocandoProperty().get() &&
+                        java.util.Objects.equals(MainPlaylistController.this.playlist, mainController.getContextoAtivo())) {
                     iconePlay.setIconLiteral("ion4-ios-pause");
                 } else {
                     iconePlay.setIconLiteral("ion4-ios-play");
@@ -212,7 +312,7 @@ public class MainPlaylistController {
 
     public void tocarMusica(Musica musica) {
         if (mainController != null) {
-            mainController.tocarMusica(musica);
+            mainController.tocarMusica(musica, new java.util.ArrayList<>(listaMusicas), this.playlist);
         }
     }
 }

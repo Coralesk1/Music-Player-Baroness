@@ -73,6 +73,10 @@ public class MainLibraryController {
 
     private ObservableList<Musica> listaMusicas = FXCollections.observableArrayList();
 
+    public ObservableList<Musica> getListaMusicas() {
+        return listaMusicas;
+    }
+
     @FXML
     public void initialize() {
 
@@ -306,7 +310,8 @@ public class MainLibraryController {
             private void atualizarIcone(Musica musicaDaLinha) {
                 if (mainController.musicaAtualProperty().get() != null &&
                         mainController.musicaAtualProperty().get().equals(musicaDaLinha) &&
-                        mainController.tocandoProperty().get()) {
+                        mainController.tocandoProperty().get() &&
+                        "BIBLIOTECA".equals(mainController.getContextoAtivo())) {
                     iconPlay.setIconLiteral("ion4-ios-pause");
                 } else {
                     iconPlay.setIconLiteral("ion4-ios-play");
@@ -317,7 +322,7 @@ public class MainLibraryController {
 
     public void tocarMusica(Musica musica) {
         if (mainController != null) {
-            mainController.tocarMusica(musica);
+            mainController.tocarMusica(musica, new java.util.ArrayList<>(listaMusicas), "BIBLIOTECA");
         }
     }
 

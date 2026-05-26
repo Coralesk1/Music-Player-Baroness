@@ -47,6 +47,8 @@ public class MainController {
     private MediaPlayer mediaPlayer;
     private final ObjectProperty<Musica> musicaAtual = new SimpleObjectProperty<>(null);
     private final BooleanProperty tocando = new SimpleBooleanProperty(false);
+    private List<Musica> filaReproducao;
+    private Object contextoAtivo = "BIBLIOTECA";
 
     public BooleanProperty tocandoProperty() {
         return tocando;
@@ -58,6 +60,15 @@ public class MainController {
 
     public void definirGerenciador(GerenciadorEstruturas gerenciadorEstruturas) {
         this.gerenciadorEstruturas = gerenciadorEstruturas;
+    }
+
+    public void definirFilaReproducao(List<Musica> fila, Object contexto) {
+        this.filaReproducao = fila;
+        this.contextoAtivo = contexto;
+    }
+
+    public Object getContextoAtivo() {
+        return contextoAtivo;
     }
 
     @FXML private VBox contentArea;
@@ -228,11 +239,12 @@ public class MainController {
         tocarMusicaAnterior();
     }
 
-    public void tocarMusica(Musica musica) {
+    public void tocarMusica(Musica musica, List<Musica> novaFila, Object novoContexto) {
         if (musica == null) return;
 
-        // Se a música clicada já é a que está tocando, alterna entre play/pause
-        if (musicaAtual.get() != null && musicaAtual.get().equals(musica)) {
+        // Se a música clicada já é a que está tocando E o contexto é o mesmo, alterna entre play/pause
+        if (musicaAtual.get() != null && musicaAtual.get().equals(musica) &&
+                java.util.Objects.equals(novoContexto, this.contextoAtivo)) {
             if (tocando.get()) {
                 mediaPlayer.pause();
                 tocando.set(false);
@@ -247,6 +259,16 @@ public class MainController {
             return;
         }
 
+        // Se for uma música nova ou um contexto novo, define a nova fila e contexto
+        if (novaFila != null) {
+            this.filaReproducao = novaFila;
+            this.contextoAtivo = novoContexto;
+        }
+
+        reproduzirMusica(musica);
+    }
+
+    private void reproduzirMusica(Musica musica) {
         // Se ja estiver tocando uma musica diferente, para para dar os recursos para outra que for tocar
         if (mediaPlayer != null) {
             mediaPlayer.stop();
@@ -323,33 +345,49 @@ public class MainController {
     }
 
     private void tocarProximaMusica() {
-        if (gerenciadorEstruturas == null || musicaAtual.get() == null) return;
+        if (musicaAtual.get() == null) return;
 
-        Set<Musica> biblioteca = gerenciadorEstruturas.getBibliotecaGeral();
+        List<Musica> fila = (filaReproducao != null) ? filaReproducao : new java.util.ArrayList<>(gerenciadorEstruturas.getBibliotecaGeral());
+        if (fila.isEmpty()) return;
+
         boolean encontrouAtual = false;
 
-        for (Musica m : biblioteca) {
+        for (Musica m : fila) {
             if (encontrouAtual) {
-                tocarMusica(m);
+                reproduzirMusica(m);
                 return;
             }
             if (m.equals(musicaAtual.get())) {
                 encontrouAtual = true;
             }
         }
-        System.out.println("Fim da biblioteca.");
+
+        // Fim da fila: Conforme solicitado "quando acabar acabo não vai reproduzir mais"
+        System.out.println("Fim da fila de reprodução no contexto ativo.");
+        pararReproducao();
+    }
+
+    private void pararReproducao() {
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+            tocando.set(false);
+            btnPlay.setSelected(false);
+            iconPlay.setIconLiteral("ion4-ios-play");
+        }
     }
 
     private void tocarMusicaAnterior() {
-        if (gerenciadorEstruturas == null || musicaAtual.get() == null) return;
+        if (musicaAtual.get() == null) return;
 
-        Set<Musica> biblioteca = gerenciadorEstruturas.getBibliotecaGeral();
+        List<Musica> fila = (filaReproducao != null) ? filaReproducao : new java.util.ArrayList<>(gerenciadorEstruturas.getBibliotecaGeral());
+        if (fila.isEmpty()) return;
+
         Musica anterior = null;
 
-        for (Musica m : biblioteca) {
+        for (Musica m : fila) {
             if (m.equals(musicaAtual.get())) {
                 if (anterior != null) {
-                    tocarMusica(anterior);
+                    reproduzirMusica(anterior);
                 }
                 return;
             }

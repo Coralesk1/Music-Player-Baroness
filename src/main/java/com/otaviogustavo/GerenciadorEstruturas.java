@@ -32,6 +32,12 @@ public class GerenciadorEstruturas {
         playlists.get(playList).add(musica);
     }
 
+    public void removerMusicaPlaylist(PlayList playList, Musica musica) {
+        if (playlists.containsKey(playList)) {
+            playlists.get(playList).remove(musica);
+        }
+    }
+
     public void removerPlaylist(String nome) {
         playlists.keySet().removeIf(playlist -> playlist.getNome().equals(nome));
     }

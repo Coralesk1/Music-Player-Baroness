@@ -24,6 +24,7 @@
             <TableColumn fx:id="colArtista" text="Artista" prefWidth="150" />
             <TableColumn fx:id="colAlbum" text="Álbum" prefWidth="200" />
             <TableColumn fx:id="colDuracao" text="Duração" prefWidth="80" />
+            <TableColumn fx:id="colExcluir" prefWidth="50" resizable="false" sortable="false" />
         </columns>
     </TableView>
 </VBox>
