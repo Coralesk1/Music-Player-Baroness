@@ -12,6 +12,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -56,7 +57,10 @@ public class MainPlaylistController {
     @FXML private TableColumn<Musica, String> colArtista;
     @FXML private TableColumn<Musica, String> colAlbum;
     @FXML private TableColumn<Musica, String> colDuracao;
+    @FXML private TableColumn<Musica, String> colAno;
     @FXML private TableColumn<Musica, Void> colExcluir;
+
+    @FXML private ComboBox<String> comboOrdenacao;
 
     private ObservableList<Musica> listaMusicas = FXCollections.observableArrayList();
     private Set<Musica> musicasPendentesExclusao = new HashSet<>();
@@ -81,6 +85,7 @@ public class MainPlaylistController {
             colArtista.setCellValueFactory(new PropertyValueFactory<>("artista"));
             colAlbum.setCellValueFactory(new PropertyValueFactory<>("album"));
             colDuracao.setCellValueFactory(new PropertyValueFactory<>("duracao"));
+            colAno.setCellValueFactory(new PropertyValueFactory<>("ano"));
 
             // Configura a coluna que contém o botão de reproduzir
             configurarColunaTocar();
@@ -89,6 +94,41 @@ public class MainPlaylistController {
             configurarColunaExcluir();
 
             tabelaMusicas.setItems(listaMusicas);
+        }
+
+        if (comboOrdenacao != null) {
+            comboOrdenacao.setItems(FXCollections.observableArrayList(
+                    "Ordem padrão",
+                    "Ordenar por nome",
+                    "Ordenar por artista",
+                    "Ordenar por ano de lançamento"
+            ));
+            comboOrdenacao.setValue("Ordem padrão");
+            comboOrdenacao.setOnAction(event -> aplicarOrdenacao());
+        }
+    }
+
+    private void aplicarOrdenacao() {
+        String opcao = comboOrdenacao.getValue();
+        if (opcao == null) return;
+
+        switch (opcao) {
+            case "Ordenar por nome":
+                listaMusicas.sort((m1, m2) -> m1.getTitulo().compareToIgnoreCase(m2.getTitulo()));
+                break;
+            case "Ordenar por artista":
+                listaMusicas.sort((m1, m2) -> m1.getArtista().compareToIgnoreCase(m2.getArtista()));
+                break;
+            case "Ordenar por ano de lançamento":
+                listaMusicas.sort((m1, m2) -> {
+                    String a1 = m1.getAno() != null ? m1.getAno() : "";
+                    String a2 = m2.getAno() != null ? m2.getAno() : "";
+                    return a1.compareTo(a2);
+                });
+                break;
+            default: // "Ordem padrão"
+                carregarMusicas();
+                break;
         }
     }
 

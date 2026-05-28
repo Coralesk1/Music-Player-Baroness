@@ -303,4 +303,49 @@
 
 .button-delete-playlist:hover .ikonli-font-icon {
     -fx-icon-color: #ff4d4d;
-}
+}
+
+.combo-box-ordenacao {
+    -fx-background-color: #282828;
+    -fx-background-radius: 5;
+    -fx-border-color: #3e3e3e;
+    -fx-border-radius: 5;
+    -fx-padding: 2 5 2 5;
+    -fx-cursor: hand;
+}
+
+.combo-box-ordenacao .label {
+    -fx-text-fill: #b3b3b3;
+}
+
+.combo-box-ordenacao:hover .label {
+    -fx-text-fill: white;
+}
+
+.combo-box-ordenacao .list-view {
+    -fx-background-color: #282828;
+    -fx-border-color: #3e3e3e;
+}
+
+.combo-box-ordenacao .list-cell {
+    -fx-background-color: #282828;
+    -fx-text-fill: white;
+    -fx-padding: 10;
+}
+
+.combo-box-ordenacao .list-cell:hover {
+    -fx-background-color: #3e3e3e;
+}
+
+.combo-box-ordenacao .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.combo-box-ordenacao .arrow {
+    -fx-background-color: #b3b3b3;
+}
+
+.combo-box-ordenacao:hover .arrow {
+    -fx-background-color: white;
+}
+

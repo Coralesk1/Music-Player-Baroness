@@ -10,11 +10,17 @@
     </padding>
 
     <!-- Cabeçalho da Playlist -->
-    <VBox spacing="10" style="-fx-padding: 0 0 10 0;">
-        <Label fx:id="lblPlaylistNome" text="Nome da Playlist" style="-fx-text-fill: white; -fx-font-size: 32px; -fx-font-weight: bold;"/>
-        <Label fx:id="lblPlaylistDescricao" text="Descrição da playlist" style="-fx-text-fill: #b3b3b3; -fx-font-size: 14px;"/>
-        <Label fx:id="lblPlaylistData" text="Criada em: " style="-fx-text-fill: #727272; -fx-font-size: 12px;"/>
-    </VBox>
+    <HBox alignment="BOTTOM_LEFT" spacing="10" style="-fx-padding: 0 0 10 0;">
+        <VBox spacing="10" HBox.hgrow="ALWAYS">
+            <Label fx:id="lblPlaylistNome" text="Nome da Playlist" style="-fx-text-fill: white; -fx-font-size: 32px; -fx-font-weight: bold;"/>
+            <Label fx:id="lblPlaylistDescricao" text="Descrição da playlist" style="-fx-text-fill: #b3b3b3; -fx-font-size: 14px;"/>
+            <Label fx:id="lblPlaylistData" text="Criada em: " style="-fx-text-fill: #727272; -fx-font-size: 12px;"/>
+        </VBox>
+        <VBox alignment="BOTTOM_RIGHT" spacing="5">
+            <Label text="Ordem personalizada" style="-fx-text-fill: #b3b3b3; -fx-font-size: 12px;"/>
+            <ComboBox fx:id="comboOrdenacao" prefWidth="200" styleClass="combo-box-ordenacao"/>
+        </VBox>
+    </HBox>
 
     <!-- Tabela de Músicas da Playlist -->
     <TableView fx:id="tabelaMusicas" VBox.vgrow="ALWAYS" styleClass="musica-table">
@@ -24,6 +30,7 @@
             <TableColumn fx:id="colArtista" text="Artista" prefWidth="150" />
             <TableColumn fx:id="colAlbum" text="Álbum" prefWidth="200" />
             <TableColumn fx:id="colDuracao" text="Duração" prefWidth="80" />
+            <TableColumn fx:id="colAno" text="Ano" prefWidth="60" />
             <TableColumn fx:id="colExcluir" prefWidth="50" resizable="false" sortable="false" />
         </columns>
     </TableView>

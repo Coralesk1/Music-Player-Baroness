@@ -38,6 +38,10 @@ public class GerenciadorEstruturas {
         }
     }
 
+    public void removerMusicaBiblioteca(Musica musica) {
+        bibliotecaGeral.remove(musica);
+    }
+
     public void removerPlaylist(String nome) {
         playlists.keySet().removeIf(playlist -> playlist.getNome().equals(nome));
     }
