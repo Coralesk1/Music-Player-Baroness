@@ -10,6 +10,7 @@ import java.util.Set;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.mpatric.mp3agic.Mp3File;
 import com.otaviogustavo.App;
 
 import com.otaviogustavo.GerenciadorEstruturas;
@@ -24,11 +25,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.Slider;
-import javafx.scene.control.ToggleButton;
+import javafx.geometry.Pos;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -45,6 +47,8 @@ public class MainController {
     private MediaPlayer mediaPlayer;
     private final ObjectProperty<Musica> musicaAtual = new SimpleObjectProperty<>(null);
     private final BooleanProperty tocando = new SimpleBooleanProperty(false);
+    private List<Musica> filaReproducao;
+    private Object contextoAtivo = "BIBLIOTECA";
 
     public BooleanProperty tocandoProperty() {
         return tocando;
@@ -58,11 +62,21 @@ public class MainController {
         this.gerenciadorEstruturas = gerenciadorEstruturas;
     }
 
+    public void definirFilaReproducao(List<Musica> fila, Object contexto) {
+        this.filaReproducao = fila;
+        this.contextoAtivo = contexto;
+    }
+
+    public Object getContextoAtivo() {
+        return contextoAtivo;
+    }
+
     @FXML private VBox contentArea;
     @FXML private ToggleButton btnHome;
     @FXML private ToggleButton btnLibrary;
-    @FXML private ComboBox<String> comboPlaylists;
+    @FXML private ListView<String> listPlaylists;
     @FXML private Button btnNewPlaylist;
+    @FXML private ImageView imgCapa;
 
     @FXML private ToggleButton btnPlay;
     @FXML private Button btnNext;
@@ -138,31 +152,45 @@ public class MainController {
 
                 gerenciadorEstruturas.adicionaPlaylistVazia(new PlayList(nome, descricao, dtCriacao));
 
-                Map<PlayList, List<Musica>> playlist =  gerenciadorEstruturas.getPlaylists();
+                salvarPlaylistsNoJson();
 
-                if (playlist != null){
-
-                    Gson gson = new GsonBuilder().enableComplexMapKeySerialization().setPrettyPrinting().create();
-
-                    // Grava o arquivo de configuração na raiz do projeto
-                    try (FileWriter writer = new FileWriter("PlayLists.json")) {
-                        gson.toJson(gerenciadorEstruturas, writer);
-                        System.out.println("Playlist salva com sucesso em PlayLists.json!");
-
-                    } catch (IOException e) {
-                        System.err.println("Erro ao salvar playlist no json:" + e.getMessage());
-                        e.printStackTrace();
-                    }
-
-                    comboPlaylists.getItems().add(nome);
-                    comboPlaylists.setValue(nome);
-                }
+                listPlaylists.getItems().add(nome);
+                listPlaylists.getSelectionModel().select(nome);
 
             }
 
         } catch (Exception e) {
             System.out.println("Erro ao salvar playlist");
             e.printStackTrace();
+        }
+    }
+
+    private void salvarPlaylistsNoJson() {
+        if (gerenciadorEstruturas != null) {
+            Gson gson = new GsonBuilder().enableComplexMapKeySerialization().setPrettyPrinting().create();
+
+            // Grava o arquivo de configuração na raiz do projeto
+            try (FileWriter writer = new FileWriter("PlayLists.json")) {
+                gson.toJson(gerenciadorEstruturas, writer);
+                System.out.println("Playlists salvas com sucesso em PlayLists.json!");
+
+            } catch (IOException e) {
+                System.err.println("Erro ao salvar playlist no json: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void lidarComRemoverPlaylist(String nome) {
+        if (gerenciadorEstruturas != null) {
+            gerenciadorEstruturas.removerPlaylist(nome);
+
+            //atualiza o json depois da remoção da playlist
+            salvarPlaylistsNoJson();
+            listPlaylists.getItems().remove(nome);
+
+
+            carregarView("main_home");
         }
     }
 
@@ -211,11 +239,12 @@ public class MainController {
         tocarMusicaAnterior();
     }
 
-    public void tocarMusica(Musica musica) {
+    public void tocarMusica(Musica musica, List<Musica> novaFila, Object novoContexto) {
         if (musica == null) return;
 
-        // Se a música clicada já é a que está tocando, alterna entre play/pause
-        if (musicaAtual.get() != null && musicaAtual.get().equals(musica)) {
+        // Se a música clicada já é a que está tocando E o contexto é o mesmo, alterna entre play/pause
+        if (musicaAtual.get() != null && musicaAtual.get().equals(musica) &&
+                java.util.Objects.equals(novoContexto, this.contextoAtivo)) {
             if (tocando.get()) {
                 mediaPlayer.pause();
                 tocando.set(false);
@@ -230,6 +259,16 @@ public class MainController {
             return;
         }
 
+        // Se for uma música nova ou um contexto novo, define a nova fila e contexto
+        if (novaFila != null) {
+            this.filaReproducao = novaFila;
+            this.contextoAtivo = novoContexto;
+        }
+
+        reproduzirMusica(musica);
+    }
+
+    private void reproduzirMusica(Musica musica) {
         // Se ja estiver tocando uma musica diferente, para para dar os recursos para outra que for tocar
         if (mediaPlayer != null) {
             mediaPlayer.stop();
@@ -244,6 +283,24 @@ public class MainController {
 
             lblTitulo.setText(musica.getTitulo());
             lblArtista.setText(musica.getArtista());
+
+            // Carrega a capa sob demanda para economizar memória
+            byte[] capaBytes = null;
+            try {
+                Mp3File mp3File = new Mp3File(musica.getCaminho());
+                if (mp3File.hasId3v2Tag()) {
+                    capaBytes = mp3File.getId3v2Tag().getAlbumImage();
+                }
+            } catch (Exception e) {
+                System.err.println("Erro ao carregar capa da música: " + e.getMessage());
+            }
+
+            if (capaBytes != null) {
+                imgCapa.setImage(new Image(new ByteArrayInputStream(capaBytes)));
+            } else {
+                imgCapa.setImage(null);
+            }
+
             btnPlay.setSelected(true);
             tocando.set(true);
             iconPlay.setIconLiteral("ion4-ios-pause");
@@ -288,33 +345,49 @@ public class MainController {
     }
 
     private void tocarProximaMusica() {
-        if (gerenciadorEstruturas == null || musicaAtual.get() == null) return;
+        if (musicaAtual.get() == null) return;
 
-        Set<Musica> biblioteca = gerenciadorEstruturas.getBibliotecaGeral();
+        List<Musica> fila = (filaReproducao != null) ? filaReproducao : new java.util.ArrayList<>(gerenciadorEstruturas.getBibliotecaGeral());
+        if (fila.isEmpty()) return;
+
         boolean encontrouAtual = false;
 
-        for (Musica m : biblioteca) {
+        for (Musica m : fila) {
             if (encontrouAtual) {
-                tocarMusica(m);
+                reproduzirMusica(m);
                 return;
             }
             if (m.equals(musicaAtual.get())) {
                 encontrouAtual = true;
             }
         }
-        System.out.println("Fim da biblioteca.");
+
+        // Fim da fila: Conforme solicitado "quando acabar acabo não vai reproduzir mais"
+        System.out.println("Fim da fila de reprodução no contexto ativo.");
+        pararReproducao();
+    }
+
+    private void pararReproducao() {
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+            tocando.set(false);
+            btnPlay.setSelected(false);
+            iconPlay.setIconLiteral("ion4-ios-play");
+        }
     }
 
     private void tocarMusicaAnterior() {
-        if (gerenciadorEstruturas == null || musicaAtual.get() == null) return;
+        if (musicaAtual.get() == null) return;
 
-        Set<Musica> biblioteca = gerenciadorEstruturas.getBibliotecaGeral();
+        List<Musica> fila = (filaReproducao != null) ? filaReproducao : new java.util.ArrayList<>(gerenciadorEstruturas.getBibliotecaGeral());
+        if (fila.isEmpty()) return;
+
         Musica anterior = null;
 
-        for (Musica m : biblioteca) {
+        for (Musica m : fila) {
             if (m.equals(musicaAtual.get())) {
                 if (anterior != null) {
-                    tocarMusica(anterior);
+                    reproduzirMusica(anterior);
                 }
                 return;
             }
@@ -381,10 +454,10 @@ public class MainController {
             GerenciadorEstruturas dados = gson.fromJson(reader, GerenciadorEstruturas.class);
 
             if (dados != null){
-                comboPlaylists.getItems().clear();
+                listPlaylists.getItems().clear();
                 this.gerenciadorEstruturas = dados;
             }
-            atualizarComboBoxPlaylist();
+            atualizarListaPlaylists();
 
         } catch (IOException e) {
             System.err.println("Erro ao carregar o arquivo JSON: " + arquivoJson);
@@ -392,10 +465,10 @@ public class MainController {
         }
     }
 
-    private void atualizarComboBoxPlaylist(){
+    private void atualizarListaPlaylists(){
         if (gerenciadorEstruturas != null){
             gerenciadorEstruturas.getPlaylists().keySet().forEach(playlist -> {
-                comboPlaylists.getItems().add(playlist.getNome());
+                listPlaylists.getItems().add(playlist.getNome());
             });
         }
     }
@@ -403,6 +476,47 @@ public class MainController {
     @FXML
     public void initialize() {
         carregarView("main_home");
+
+        listPlaylists.setCellFactory(lv -> new ListCell<String>() {
+            private final HBox container = new HBox(10);
+            private final Label label = new Label();
+            private final Button btnDelete = new Button();
+            private final FontIcon iconDelete = new FontIcon("ion4-md-trash");
+
+            {
+                label.setMaxWidth(Double.MAX_VALUE);
+                HBox.setHgrow(label, Priority.ALWAYS);
+                iconDelete.setIconSize(16);
+                btnDelete.setGraphic(iconDelete);
+                btnDelete.getStyleClass().add("button-delete-playlist");
+                btnDelete.setOnAction(e -> {
+                    String item = getItem();
+                    if (item != null) {
+                        lidarComRemoverPlaylist(item);
+                    }
+                });
+                container.getChildren().addAll(label, btnDelete);
+                container.setAlignment(Pos.CENTER_LEFT);
+            }
+
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setGraphic(null);
+                    setText(null);
+                } else {
+                    label.setText(item);
+                    setGraphic(container);
+                }
+            }
+        });
+
+        listPlaylists.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null && !carregando) {
+                lidarComSelecaoPlaylist(newVal);
+            }
+        });
 
         sliderTime.valueProperty().addListener((obs, oldVal, newVal) -> atualizaCorSlider(sliderTime));
         sliderTime.maxProperty().addListener((obs, oldVal, newVal) -> atualizaCorSlider(sliderTime));
@@ -447,24 +561,18 @@ public class MainController {
 
     private boolean carregando = false;
 
-    @FXML
-    private void lidarComSelecaoPlaylist(ActionEvent event) {
-        if (carregando) {
-            return;
-        }
-
-        String nomePlaylist = comboPlaylists.getValue();
+    private void lidarComSelecaoPlaylist(String nomePlaylist) {
         if (nomePlaylist == null || nomePlaylist.isEmpty()) {
             return;
         }
 
         carregando = true;
         try {
-            // Recarrega as playlists do JSON para garantir que temos as músicas mais recentes
+            // Recarrega as playlists do JSON
             carregarPlaylistsDoJson();
 
-            // Garante que o ComboBox mantenha o valor selecionado após o recarregamento
-            comboPlaylists.setValue(nomePlaylist);
+            // Garante que o ListView mantenha o valor selecionado após o recarregamento
+            listPlaylists.getSelectionModel().select(nomePlaylist);
 
             PlayList playlistSelecionada = null;
             if (gerenciadorEstruturas != null) {

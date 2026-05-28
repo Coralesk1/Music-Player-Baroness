@@ -33,13 +33,18 @@ import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.StageStyle;
 import java.net.URL;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 
 
 public class MainLibraryController {
 
     private MainController mainController;
     private GerenciadorEstruturas gerenciadorEstruturas;
+    private Set<Musica> musicasPendentesExclusao = new HashSet<>();
 
     public void definirGerenciador(GerenciadorEstruturas gerenciadorEstruturas) {
         this.gerenciadorEstruturas = gerenciadorEstruturas;
@@ -70,8 +75,16 @@ public class MainLibraryController {
     private TableColumn<Musica, String> colAlbum;
     @FXML
     private TableColumn<Musica, String> colDuracao;
+    @FXML
+    private TableColumn<Musica, String> colAno;
+    @FXML
+    private TableColumn<Musica, Void> colExcluir;
 
     private ObservableList<Musica> listaMusicas = FXCollections.observableArrayList();
+
+    public ObservableList<Musica> getListaMusicas() {
+        return listaMusicas;
+    }
 
     @FXML
     public void initialize() {
@@ -79,10 +92,13 @@ public class MainLibraryController {
         // Configura como cada coluna vai buscar o dado no objeto Musica
         colTitulo.setCellValueFactory(new PropertyValueFactory<>("titulo"));
         colArtista.setCellValueFactory(new PropertyValueFactory<>("artista"));
+        colAlbum.setCellValueFactory(new PropertyValueFactory<>("album"));
         colDuracao.setCellValueFactory(new PropertyValueFactory<>("duracao"));
+        colAno.setCellValueFactory(new PropertyValueFactory<>("ano"));
 
         configurarColunaAdd();
         configurarColunaPlay();
+        configurarColunaExcluir();
 
         tabelaMusicas.setItems(listaMusicas);
 
@@ -92,7 +108,9 @@ public class MainLibraryController {
                 System.out.println("--- Música Selecionada ---");
                 System.out.println("Título: " + novoValor.getTitulo());
                 System.out.println("Artista: " + novoValor.getArtista());
+                System.out.println("Álbum: " + novoValor.getAlbum());
                 System.out.println("Duração: " + novoValor.getDuracao());
+                System.out.println("Ano: " + novoValor.getAno());
 
             }
         });
@@ -163,8 +181,12 @@ public class MainLibraryController {
 
         String titulo = arquivoMp3.getName();
         String artista = "Artista Desconhecido";
+        String album = "Álbum Desconhecido";
+        String genero = "Gênero Desconhecido";
         String duracao = "00:00";
+        String ano = "----";
         String caminho = arquivoMp3.getAbsolutePath();
+        byte[] capa = null;
 
         try {
             // Carrega o arquivo MP3
@@ -187,11 +209,25 @@ public class MainLibraryController {
                 if (id3v2Tag.getArtist() != null && !id3v2Tag.getArtist().isBlank()) {
                     artista = id3v2Tag.getArtist();
                 }
+                if (id3v2Tag.getAlbum() != null && !id3v2Tag.getAlbum().isBlank()) {
+                    album = id3v2Tag.getAlbum();
+                }
+                if (id3v2Tag.getGenreDescription() != null && !id3v2Tag.getGenreDescription().isBlank()) {
+                    genero = id3v2Tag.getGenreDescription();
+                }
+                if (id3v2Tag.getYear() != null && !id3v2Tag.getYear().isBlank()) {
+                    ano = id3v2Tag.getYear();
+                }
+                // Não carregamos a imagem aqui para evitar OutOfMemory
+                // capa = id3v2Tag.getAlbumImage();
             } else if (mp3File.hasId3v1Tag()) { // Se não tiver ID3v2, tenta ler o formato antigo ID3v1
 
                 var id3v1Tag = mp3File.getId3v1Tag();
                 if (id3v1Tag.getTitle() != null && !id3v1Tag.getTitle().isBlank()) titulo = id3v1Tag.getTitle();
                 if (id3v1Tag.getArtist() != null && !id3v1Tag.getArtist().isBlank()) artista = id3v1Tag.getArtist();
+                if (id3v1Tag.getAlbum() != null && !id3v1Tag.getAlbum().isBlank()) album = id3v1Tag.getAlbum();
+                if (id3v1Tag.getGenreDescription() != null && !id3v1Tag.getGenreDescription().isBlank()) genero = id3v1Tag.getGenreDescription();
+                if (id3v1Tag.getYear() != null && !id3v1Tag.getYear().isBlank()) ano = id3v1Tag.getYear();
             }
 
         } catch (Exception e) {
@@ -199,7 +235,7 @@ public class MainLibraryController {
             e.printStackTrace();
         }
 
-        return new Musica(titulo, artista, duracao, caminho);
+        return new Musica(titulo, artista, album, genero, duracao, ano, caminho, capa);
     }
 
     private void carregarBibliotecaDoJson() {
@@ -291,7 +327,8 @@ public class MainLibraryController {
             private void atualizarIcone(Musica musicaDaLinha) {
                 if (mainController.musicaAtualProperty().get() != null &&
                         mainController.musicaAtualProperty().get().equals(musicaDaLinha) &&
-                        mainController.tocandoProperty().get()) {
+                        mainController.tocandoProperty().get() &&
+                        "BIBLIOTECA".equals(mainController.getContextoAtivo())) {
                     iconPlay.setIconLiteral("ion4-ios-pause");
                 } else {
                     iconPlay.setIconLiteral("ion4-ios-play");
@@ -302,7 +339,7 @@ public class MainLibraryController {
 
     public void tocarMusica(Musica musica) {
         if (mainController != null) {
-            mainController.tocarMusica(musica);
+            mainController.tocarMusica(musica, new java.util.ArrayList<>(listaMusicas), "BIBLIOTECA");
         }
     }
 
@@ -403,6 +440,93 @@ public class MainLibraryController {
         } catch (Exception e) {
             System.out.println("Erro ao salvar musica da plalist:" + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    private void configurarColunaExcluir() {
+        if (colExcluir == null) return;
+
+        colExcluir.setCellFactory(column -> new TableCell<>() {
+            private final Button btnExcluir = new Button();
+            private final FontIcon iconeLixeira = new FontIcon("ion4-ios-trash");
+
+            {
+                btnExcluir.getStyleClass().add("button-delete-playlist");
+                iconeLixeira.setIconSize(20);
+                btnExcluir.setGraphic(iconeLixeira);
+                btnExcluir.setOnAction(event -> {
+                    Musica musica = getTableView().getItems().get(getIndex());
+                    excluirMusicaDaBiblioteca(musica);
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(btnExcluir);
+                }
+            }
+        });
+    }
+
+    private void excluirMusicaDaBiblioteca(Musica musica) {
+        if (mainController != null && mainController.musicaAtualProperty().get() != null &&
+                mainController.musicaAtualProperty().get().equals(musica)) {
+
+            // Se a música está tocando e não está na lista de pendentes, adiciona
+            if (!musicasPendentesExclusao.contains(musica)) {
+                musicasPendentesExclusao.add(musica);
+
+                ChangeListener<Musica> listener = new ChangeListener<Musica>() {
+                    @Override
+                    public void changed(ObservableValue<? extends Musica> observable, Musica oldMusic, Musica newMusic) {
+                        // Quando mudar a música, removemos efetivamente a que estava pendente
+                        if (oldMusic != null && oldMusic.equals(musica) && !musica.equals(newMusic)) {
+                            removerMusicaEfetivamente(musica);
+                            musicasPendentesExclusao.remove(musica);
+                            mainController.musicaAtualProperty().removeListener(this);
+                        }
+                    }
+                };
+                mainController.musicaAtualProperty().addListener(listener);
+                System.out.println("Exclusão adiada. A música será removida quando a reprodução mudar ou terminar: " + musica.getTitulo());
+            }
+        } else {
+            // Se não for a música atual, remove imediatamente
+            removerMusicaEfetivamente(musica);
+        }
+    }
+
+    private void removerMusicaEfetivamente(Musica musica) {
+        if (gerenciadorEstruturas != null) {
+            gerenciadorEstruturas.removerMusicaBiblioteca(musica);
+            listaMusicas.remove(musica);
+            salvarBibliotecaNoJson();
+        }
+    }
+
+    private void salvarBibliotecaNoJson() {
+        if (gerenciadorEstruturas != null) {
+            List<String> listaCaminhos = new ArrayList<>();
+            for (Musica m : gerenciadorEstruturas.getBibliotecaGeral()) {
+                listaCaminhos.add(m.getCaminho());
+            }
+
+            LibraryFilePaths libraryData = new LibraryFilePaths();
+            libraryData.setListaCaminhos(listaCaminhos);
+
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+            try (FileWriter writer = new FileWriter("LibraryFilePath.json")) {
+                gson.toJson(libraryData, writer);
+                System.out.println("Biblioteca atualizada com sucesso em LibraryFilePath.json!");
+            } catch (IOException e) {
+                System.err.println("Erro ao salvar a biblioteca no json: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
 }

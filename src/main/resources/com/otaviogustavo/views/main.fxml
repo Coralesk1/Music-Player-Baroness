@@ -39,16 +39,15 @@
             <FontIcon iconLiteral="ion4-md-albums" iconSize="20"/>
           </graphic>
         </ToggleButton>
-        <VBox spacing="5" style="-fx-padding: 10 0 0 0;">
+        <VBox spacing="5" style="-fx-padding: 10 0 0 0;" VBox.vgrow="ALWAYS">
            <Button fx:id="btnNewPlaylist" text="Nova Playlist" maxWidth="Infinity" styleClass="button-menu" alignment="CENTER_LEFT" onAction="#lidarComNovaPlaylist">
              <graphic>
                <FontIcon iconLiteral="ion4-md-add" iconSize="20"/>
              </graphic>
            </Button>
            <Label text="Playlists" style="-fx-text-fill: #b3b3b3; -fx-font-size: 12px; -fx-font-weight: bold; -fx-padding: 10 0 5 15;"/>
-           <ComboBox fx:id="comboPlaylists" promptText="Selecionar Playlist" maxWidth="Infinity" styleClass="combo-playlists" onAction="#lidarComSelecaoPlaylist"/>
-        </VBox>
-      </VBox>
+           <ListView fx:id="listPlaylists" maxWidth="Infinity" styleClass="playlist-list-view" VBox.vgrow="ALWAYS"/>
+        </VBox>      </VBox>
     </VBox>
   </left>
 
@@ -68,7 +67,7 @@
       </columnConstraints>
 
       <HBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="0">
-        <Rectangle width="32" height="32" fill="black"/>
+        <ImageView fx:id="imgCapa" fitWidth="32" fitHeight="32" pickOnBounds="true" preserveRatio="true"/>
         <VBox alignment="CENTER_LEFT">
           <Label fx:id="lblTitulo" text="Selecione uma música" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
           <Label fx:id="lblArtista" text="Artista" style="-fx-text-fill: white; -fx-font-size: 11px;"/>

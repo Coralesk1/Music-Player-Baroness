@@ -35,12 +35,6 @@ public class App extends Application {
         stage.show();
     }
 
-    public static void setRoot(String fxml) throws IOException {
-        // Se no futuro voc� trocar de tela usando setRoot, ele tamb�m injeta o gerenciador
-        scene.setRoot(loadFXMLAndInject(fxml));
-        loadStyle(fxml);
-    }
-
     private static void loadStyle(String fxml) {
         URL styleSheet = App.class.getResource("css/" + fxml + ".css");
 
@@ -49,17 +43,7 @@ public class App extends Application {
         }
     }
 
-    // deixei caso precise carregar algo sem precisar injetar o GerenciadorEstruturas
-    private static Parent loadFXML(String fxml) throws IOException {
-        URL fxmlLocation = App.class.getResource("views/" + fxml + ".fxml");
-        if (fxmlLocation == null) {
-            throw new IOException("FXML file not found: views/" + fxml + ".fxml");
-        }
-        FXMLLoader fxmlLoader = new FXMLLoader(fxmlLocation);
-        return fxmlLoader.load();
-    }
-
-    //Carrega o FXML, descobre quem � o controller e injeta o gerenciador
+    //Carrega o FXML, descobre quem é o controller e injeta o gerenciador
     private static Parent loadFXMLAndInject(String fxml) throws IOException {
         URL fxmlLocation = App.class.getResource("views/" + fxml + ".fxml");
         if (fxmlLocation == null) {
@@ -71,7 +55,7 @@ public class App extends Application {
 
         Object controller = fxmlLoader.getController();
 
-        // 1. ENTREGA O GERENCIADOR PARA O MAIN CONTROLLER!
+        // ENTREGA O GERENCIADOR PARA O MAIN CONTROLLER!
         if (controller instanceof MainController) {
             ((MainController) controller).definirGerenciador(gerenciadorEstruturas);
         }
