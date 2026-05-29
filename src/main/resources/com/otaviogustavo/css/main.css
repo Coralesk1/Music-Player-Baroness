@@ -348,4 +348,27 @@
 .combo-box-ordenacao:hover .arrow {
     -fx-background-color: white;
 }
+
+/* Search Bar Styles */
+.search-container {
+    -fx-background-color: #282828;
+    -fx-background-radius: 20;
+    -fx-padding: 5 15 5 15;
+    -fx-max-width: 400px;
+}
+
+.search-icon {
+    -fx-icon-color: #b3b3b3;
+}
+
+.search-field {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-prompt-text-fill: #727272;
+    -fx-font-size: 14px;
+}
+
+.search-field:focused {
+    -fx-border-color: transparent;
+}
 

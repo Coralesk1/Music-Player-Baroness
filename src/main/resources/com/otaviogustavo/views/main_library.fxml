@@ -2,6 +2,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <VBox xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" spacing="20" fx:controller="com.otaviogustavo.controllers.MainLibraryController">
     <padding>
@@ -13,6 +14,11 @@
         <Button fx:id="btnOpenFolder" text="Adicionar pasta" onAction="#abrirJanelaArquivos" styleClass="button-add-folder"/>
     </HBox>
 
+    <HBox alignment="CENTER_LEFT" spacing="10" styleClass="search-container">
+        <FontIcon iconLiteral="ion4-ios-search" iconSize="20" styleClass="search-icon"/>
+        <TextField fx:id="txtBusca" promptText="Buscar músicas pelo nome ou artista..." HBox.hgrow="ALWAYS" styleClass="search-field"/>
+    </HBox>
+
     <TableView fx:id="tabelaMusicas" VBox.vgrow="ALWAYS" styleClass="musica-table">
         <columns>
             <TableColumn fx:id="colAdd" prefWidth="50" resizable="false" sortable="false" />
@@ -21,8 +27,6 @@
             <TableColumn fx:id="colArtista" text="Artista" prefWidth="150" />
             <TableColumn fx:id="colAlbum" text="Álbum" prefWidth="200" />
             <TableColumn fx:id="colDuracao" text="Duração" prefWidth="80" />
-            <TableColumn fx:id="colAno" text="Ano" prefWidth="60" />
             <TableColumn fx:id="colExcluir" prefWidth="50" resizable="false" sortable="false" />
-        </columns>
-    </TableView>
+            </columns>    </TableView>
 </VBox>
