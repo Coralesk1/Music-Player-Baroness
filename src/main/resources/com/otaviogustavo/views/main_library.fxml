@@ -17,6 +17,7 @@
     <HBox alignment="CENTER_LEFT" spacing="10" styleClass="search-container">
         <FontIcon iconLiteral="ion4-ios-search" iconSize="20" styleClass="search-icon"/>
         <TextField fx:id="txtBusca" promptText="Buscar músicas pelo nome ou artista..." HBox.hgrow="ALWAYS" styleClass="search-field"/>
+        <ComboBox fx:id="comboOrdenacao" prefWidth="200" styleClass="combo-box-ordenacao"/>
     </HBox>
 
     <TableView fx:id="tabelaMusicas" VBox.vgrow="ALWAYS" styleClass="musica-table">

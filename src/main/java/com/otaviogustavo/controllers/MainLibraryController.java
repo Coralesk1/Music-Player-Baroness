@@ -40,6 +40,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.transformation.FilteredList;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ComboBox;
 
 
 public class MainLibraryController {
@@ -67,6 +68,9 @@ public class MainLibraryController {
     private TextField txtBusca;
 
     @FXML
+    private ComboBox<String> comboOrdenacao;
+
+    @FXML
     private TableView<Musica> tabelaMusicas;
     @FXML
     private TableColumn<Musica, Void> colAdd;
@@ -84,7 +88,6 @@ public class MainLibraryController {
     private TableColumn<Musica, Void> colExcluir;
 
     private ObservableList<Musica> listaMusicas = FXCollections.observableArrayList();
-    private FilteredList<Musica> listaFiltrada;
 
     public ObservableList<Musica> getListaMusicas() {
         return listaMusicas;
@@ -103,32 +106,24 @@ public class MainLibraryController {
         configurarColunaPlay();
         configurarColunaExcluir();
 
-        // Inicializa a lista filtrada envolvendo a lista original
-        listaFiltrada = new FilteredList<>(listaMusicas, p -> true);
-
-        // Adiciona um listener para o campo de busca
+        // Adiciona um listener para o campo de busca que usa a lógica da estrutura
         txtBusca.textProperty().addListener((observable, oldValue, newValue) -> {
-            listaFiltrada.setPredicate(musica -> {
-                // Se o campo de busca estiver vazio, mostra todas as músicas
-                if (newValue == null || newValue.isEmpty()) {
-                    return true;
-                }
-
-                String filtro = newValue.toLowerCase();
-
-                // Verifica se o título ou o artista contém o texto digitado
-                if (musica.getTitulo().toLowerCase().contains(filtro)) {
-                    return true;
-                } else if (musica.getArtista().toLowerCase().contains(filtro)) {
-                    return true;
-                }
-
-                return false; // Não corresponde
-            });
+            atualizarListaComBuscaEOrdenacao();
         });
 
-        // Define a lista filtrada na tabela
-        tabelaMusicas.setItems(listaFiltrada);
+        // Configura o ComboBox de ordenação
+        if (comboOrdenacao != null) {
+            comboOrdenacao.setItems(FXCollections.observableArrayList(
+                    "Ordem padrão",
+                    "Ordenar por nome",
+                    "Ordenar por artista"
+            ));
+            comboOrdenacao.setValue("Ordem padrão");
+            comboOrdenacao.setOnAction(event -> atualizarListaComBuscaEOrdenacao());
+        }
+
+        // Define a lista na tabela
+        tabelaMusicas.setItems(listaMusicas);
 
         tabelaMusicas.getSelectionModel().selectedItemProperty().addListener((obs, antigoValor, novoValor) -> {
             if (novoValor != null) {
@@ -141,6 +136,23 @@ public class MainLibraryController {
 
             }
         });
+    }
+
+    private void atualizarListaComBuscaEOrdenacao() {
+        if (gerenciadorEstruturas == null) return;
+
+        // 1. Busca na estrutura
+        String termo = txtBusca.getText();
+        List<Musica> resultado = gerenciadorEstruturas.buscarMusicaNaBiblioteca(termo);
+
+        // 2. Aplica a ordenação se necessário
+        String opcao = comboOrdenacao.getValue();
+        if (opcao != null && !opcao.equals("Ordem padrão")) {
+            gerenciadorEstruturas.ordenarLista(resultado, opcao);
+        }
+
+        // 3. Atualiza a lista observável
+        listaMusicas.setAll(resultado);
     }
 
     @FXML

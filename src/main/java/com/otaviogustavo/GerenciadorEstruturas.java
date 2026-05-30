@@ -46,6 +46,36 @@ public class GerenciadorEstruturas {
         playlists.keySet().removeIf(playlist -> playlist.getNome().equals(nome));
     }
 
+    public List<Musica> buscarMusicaNaBiblioteca(String termo) {
+        if (termo == null || termo.isEmpty()) {
+            return new ArrayList<>(bibliotecaGeral);
+        }
+
+        String filtro = termo.toLowerCase();
+        List<Musica> resultado = new ArrayList<>();
+
+        for (Musica musica : bibliotecaGeral) {
+            if (musica.getTitulo().toLowerCase().contains(filtro) ||
+                musica.getArtista().toLowerCase().contains(filtro)) {
+                resultado.add(musica);
+            }
+        }
+        return resultado;
+    }
+
+    public void ordenarLista(List<Musica> lista, String criterio) {
+        if (criterio == null) return;
+
+        switch (criterio) {
+            case "Ordenar por nome":
+                lista.sort((m1, m2) -> m1.getTitulo().compareToIgnoreCase(m2.getTitulo()));
+                break;
+            case "Ordenar por artista":
+                lista.sort((m1, m2) -> m1.getArtista().compareToIgnoreCase(m2.getArtista()));
+                break;
+        }
+    }
+
 }
 
 
