@@ -6,10 +6,31 @@ public class GerenciadorEstruturas {
 
     private Set<Musica> bibliotecaGeral;
     private Map<PlayList, List<Musica>> playlists;
+    private Stack<Musica> historicoReproducao;
 
     public GerenciadorEstruturas(){
         this.bibliotecaGeral = new LinkedHashSet<>();
         this.playlists = new HashMap<>();
+        this.historicoReproducao = new Stack<>();
+    }
+
+    public Stack<Musica> getHistoricoReproducao() {
+        return historicoReproducao;
+    }
+
+    public void setHistoricoReproducao(Stack<Musica> historico) {
+        this.historicoReproducao = historico;
+    }
+
+    public void adicionarMusicaHistorico(Musica musica) {
+        if (musica == null) return;
+
+        historicoReproducao.remove(musica);
+        historicoReproducao.push(musica);
+
+        while (historicoReproducao.size() > 20) {
+            historicoReproducao.remove(0);
+        }
     }
 
     public void adicionarMusicaBiblioteca(Musica musica){

@@ -4,9 +4,9 @@ import java.io.*;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.Queue;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -41,14 +41,22 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+import com.otaviogustavo.commands.*;
+
 public class MainController {
 
     private GerenciadorEstruturas gerenciadorEstruturas;
     private MediaPlayer mediaPlayer;
     private final ObjectProperty<Musica> musicaAtual = new SimpleObjectProperty<>(null);
     private final BooleanProperty tocando = new SimpleBooleanProperty(false);
-    private List<Musica> filaReproducao;
+    private Queue<Musica> filaReproducao = new LinkedList<>();
+    private List<Musica> listaContexto;
     private Object contextoAtivo = "BIBLIOTECA";
+
+    // Comandos
+    private Comando comandoPlay;
+    private Comando comandoProximo;
+    private Comando comandoAnterior;
 
     public BooleanProperty tocandoProperty() {
         return tocando;
@@ -63,7 +71,7 @@ public class MainController {
     }
 
     public void definirFilaReproducao(List<Musica> fila, Object contexto) {
-        this.filaReproducao = fila;
+        this.listaContexto = fila;
         this.contextoAtivo = contexto;
     }
 
@@ -181,6 +189,23 @@ public class MainController {
         }
     }
 
+    private void salvarHistoricoNoJson() {
+        if (gerenciadorEstruturas != null && gerenciadorEstruturas.getHistoricoReproducao() != null) {
+
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+            try (FileWriter writer = new FileWriter("Historico.json")) {
+
+                gson.toJson(gerenciadorEstruturas.getHistoricoReproducao(), writer);
+                System.out.println("Histórico salvo com sucesso em Historico.json!");
+
+            } catch (IOException e) {
+                System.err.println("Erro ao salvar histórico no json: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+
     private void lidarComRemoverPlaylist(String nome) {
         if (gerenciadorEstruturas != null) {
             gerenciadorEstruturas.removerPlaylist(nome);
@@ -212,6 +237,10 @@ public class MainController {
 
     @FXML
     private void lidarComAcaoPlay(ActionEvent event) {
+        comandoPlay.executar();
+    }
+
+    public void alternarReproducao() {
         if (mediaPlayer == null) {
             btnPlay.setSelected(false);
             tocando.set(false);
@@ -231,12 +260,12 @@ public class MainController {
 
     @FXML
     private void lidarComAcaoProxima(ActionEvent event) {
-        tocarProximaMusica();
+        comandoProximo.executar();
     }
 
     @FXML
     private void lidarComAcaoAnterior(ActionEvent event) {
-        tocarMusicaAnterior();
+        comandoAnterior.executar();
     }
 
     public void tocarMusica(Musica musica, List<Musica> novaFila, Object novoContexto) {
@@ -259,16 +288,42 @@ public class MainController {
             return;
         }
 
-        // Se for uma música nova ou um contexto novo, define a nova fila e contexto
+        // Se for uma música nova ou um contexto novo, define a nova lista e contexto
         if (novaFila != null) {
-            this.filaReproducao = novaFila;
+            this.listaContexto = novaFila;
             this.contextoAtivo = novoContexto;
+        } else if (this.listaContexto == null) {
+            this.listaContexto = new java.util.ArrayList<>(gerenciadorEstruturas.getBibliotecaGeral());
         }
+
+        // monta a fila com as músicas que vem depois da selecionada
+        prepararFila(musica);
 
         reproduzirMusica(musica);
     }
 
+    private void prepararFila(Musica musicaReferencia) {
+        filaReproducao.clear();
+        if (listaContexto == null || listaContexto.isEmpty()) return;
+
+        boolean encontrou = false;
+        for (Musica m : listaContexto) {
+            if (encontrou) {
+                filaReproducao.offer(m);
+            }
+            if (m.equals(musicaReferencia)) {
+                encontrou = true;
+            }
+        }
+    }
+
     private void reproduzirMusica(Musica musica) {
+        // Atualiza o histórico
+        if (gerenciadorEstruturas != null) {
+            gerenciadorEstruturas.adicionarMusicaHistorico(musica);
+            salvarHistoricoNoJson();
+        }
+
         // Se ja estiver tocando uma musica diferente, para para dar os recursos para outra que for tocar
         if (mediaPlayer != null) {
             mediaPlayer.stop();
@@ -344,27 +399,16 @@ public class MainController {
         }
     }
 
-    private void tocarProximaMusica() {
-        if (musicaAtual.get() == null) return;
+    public void tocarProximaMusica() {
 
-        List<Musica> fila = (filaReproducao != null) ? filaReproducao : new java.util.ArrayList<>(gerenciadorEstruturas.getBibliotecaGeral());
-        if (fila.isEmpty()) return;
+        Musica proxima = filaReproducao.poll();
 
-        boolean encontrouAtual = false;
-
-        for (Musica m : fila) {
-            if (encontrouAtual) {
-                reproduzirMusica(m);
-                return;
-            }
-            if (m.equals(musicaAtual.get())) {
-                encontrouAtual = true;
-            }
+        if (proxima != null) {
+            reproduzirMusica(proxima);
+        } else { //fim da fila
+            System.out.println("Fim da fila de reprodução no contexto ativo.");
+            pararReproducao();
         }
-
-        // Fim da fila: Conforme solicitado "quando acabar acabo não vai reproduzir mais"
-        System.out.println("Fim da fila de reprodução no contexto ativo.");
-        pararReproducao();
     }
 
     private void pararReproducao() {
@@ -376,18 +420,15 @@ public class MainController {
         }
     }
 
-    private void tocarMusicaAnterior() {
-        if (musicaAtual.get() == null) return;
-
-        List<Musica> fila = (filaReproducao != null) ? filaReproducao : new java.util.ArrayList<>(gerenciadorEstruturas.getBibliotecaGeral());
-        if (fila.isEmpty()) return;
+    public void tocarMusicaAnterior() {
+        if (musicaAtual.get() == null || listaContexto == null) return;
 
         Musica anterior = null;
 
-        for (Musica m : fila) {
+        for (Musica m : listaContexto) {
             if (m.equals(musicaAtual.get())) {
                 if (anterior != null) {
-                    reproduzirMusica(anterior);
+                    tocarMusica(anterior, listaContexto, contextoAtivo);
                 }
                 return;
             }
@@ -405,6 +446,7 @@ public class MainController {
     private void carregarView(String fxml) {
 
         carregarPlaylistsDoJson();
+        carregarHistoricoDoJson();
 
         try {
 
@@ -430,11 +472,39 @@ public class MainController {
                 mainPlaylistController.definirGerenciador(this.gerenciadorEstruturas);
                 mainPlaylistController.definirMainController(this);
             }
+            
+            if (subController instanceof MainHomeController) {
+                MainHomeController homeController = (MainHomeController) subController;
+                homeController.definirGerenciador(this.gerenciadorEstruturas);
+                homeController.definirMainController(this);
+            }
 
             contentArea.getChildren().setAll(root);
 
         } catch (IOException e) {
             System.err.println("Erro ao carregar a view: " + fxml);
+            e.printStackTrace();
+        }
+    }
+
+    private void carregarHistoricoDoJson() {
+        File arquivoJson = new File("Historico.json");
+
+        if (!arquivoJson.exists() || gerenciadorEstruturas == null) {
+            return;
+        }
+
+        Gson gson = new Gson();
+
+        try (FileReader reader = new FileReader(arquivoJson)) {
+            java.lang.reflect.Type tipoPilha = new com.google.gson.reflect.TypeToken<java.util.Stack<Musica>>(){}.getType();
+            java.util.Stack<Musica> dados = gson.fromJson(reader, tipoPilha);
+
+            if (dados != null) {
+                gerenciadorEstruturas.setHistoricoReproducao(dados);
+            }
+        } catch (IOException e) {
+            System.err.println("Erro ao carregar o arquivo JSON de Histórico: " + arquivoJson);
             e.printStackTrace();
         }
     }
@@ -475,6 +545,11 @@ public class MainController {
 
     @FXML
     public void initialize() {
+        // Inicializa os comandos
+        comandoPlay = new ComandoPlay(this);
+        comandoProximo = new ComandoProximo(this);
+        comandoAnterior = new ComandoAnterior(this);
+
         carregarView("main_home");
 
         listPlaylists.setCellFactory(lv -> new ListCell<String>() {
