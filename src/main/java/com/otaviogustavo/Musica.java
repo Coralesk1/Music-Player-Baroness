@@ -7,20 +7,18 @@ public class Musica {
     private String album;
     private String genero;
     private String duracao;
-    private String ano;
     private String caminho;
     private transient byte[] capa;
 
     public Musica() { // construtor vazio por causa do Gson conseguir fazer a deserialização do json
     }
 
-    public Musica(String titulo, String artista, String album, String genero, String duracao, String ano, String caminho, byte[] capa) {
+    public Musica(String titulo, String artista, String album, String genero, String duracao, String caminho, byte[] capa) {
         this.titulo = titulo;
         this.artista = artista;
         this.album = album;
         this.genero = genero;
         this.duracao = duracao;
-        this.ano = ano;
         this.caminho = caminho;
         this.capa = capa;
     }
@@ -63,14 +61,6 @@ public class Musica {
 
     public void setDuracao(String duracao) {
         this.duracao = duracao;
-    }
-
-    public String getAno() {
-        return ano;
-    }
-
-    public void setAno(String ano) {
-        this.ano = ano;
     }
 
     public String getCaminho() {
@@ -117,7 +107,6 @@ public class Musica {
                 ", album='" + album + '\'' +
                 ", genero='" + genero + '\'' +
                 ", duracao='" + duracao + '\'' +
-                ", ano='" + ano + '\'' +
                 ", caminho='" + caminho + '\'' +
                 '}';
     }

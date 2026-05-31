@@ -38,6 +38,9 @@ import java.util.Map;
 import java.util.Set;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.transformation.FilteredList;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ComboBox;
 
 
 public class MainLibraryController {
@@ -62,6 +65,12 @@ public class MainLibraryController {
     private Button btnOpenFolder;
 
     @FXML
+    private TextField txtBusca;
+
+    @FXML
+    private ComboBox<String> comboOrdenacao;
+
+    @FXML
     private TableView<Musica> tabelaMusicas;
     @FXML
     private TableColumn<Musica, Void> colAdd;
@@ -75,8 +84,6 @@ public class MainLibraryController {
     private TableColumn<Musica, String> colAlbum;
     @FXML
     private TableColumn<Musica, String> colDuracao;
-    @FXML
-    private TableColumn<Musica, String> colAno;
     @FXML
     private TableColumn<Musica, Void> colExcluir;
 
@@ -94,12 +101,28 @@ public class MainLibraryController {
         colArtista.setCellValueFactory(new PropertyValueFactory<>("artista"));
         colAlbum.setCellValueFactory(new PropertyValueFactory<>("album"));
         colDuracao.setCellValueFactory(new PropertyValueFactory<>("duracao"));
-        colAno.setCellValueFactory(new PropertyValueFactory<>("ano"));
 
         configurarColunaAdd();
         configurarColunaPlay();
         configurarColunaExcluir();
 
+        // Adiciona um listener para o campo de busca que usa a lógica da estrutura
+        txtBusca.textProperty().addListener((observable, oldValue, newValue) -> {
+            atualizarListaComBuscaEOrdenacao();
+        });
+
+        // Configura o ComboBox de ordenação
+        if (comboOrdenacao != null) {
+            comboOrdenacao.setItems(FXCollections.observableArrayList(
+                    "Ordem padrão",
+                    "Ordenar por nome",
+                    "Ordenar por artista"
+            ));
+            comboOrdenacao.setValue("Ordem padrão");
+            comboOrdenacao.setOnAction(event -> atualizarListaComBuscaEOrdenacao());
+        }
+
+        // Define a lista na tabela
         tabelaMusicas.setItems(listaMusicas);
 
         tabelaMusicas.getSelectionModel().selectedItemProperty().addListener((obs, antigoValor, novoValor) -> {
@@ -110,10 +133,26 @@ public class MainLibraryController {
                 System.out.println("Artista: " + novoValor.getArtista());
                 System.out.println("Álbum: " + novoValor.getAlbum());
                 System.out.println("Duração: " + novoValor.getDuracao());
-                System.out.println("Ano: " + novoValor.getAno());
 
             }
         });
+    }
+
+    private void atualizarListaComBuscaEOrdenacao() {
+        if (gerenciadorEstruturas == null) return;
+
+        // 1. Busca na estrutura
+        String termo = txtBusca.getText();
+        List<Musica> resultado = gerenciadorEstruturas.buscarMusicaNaBiblioteca(termo);
+
+        // 2. Aplica a ordenação se necessário
+        String opcao = comboOrdenacao.getValue();
+        if (opcao != null && !opcao.equals("Ordem padrão")) {
+            gerenciadorEstruturas.ordenarLista(resultado, opcao);
+        }
+
+        // 3. Atualiza a lista observável
+        listaMusicas.setAll(resultado);
     }
 
     @FXML
@@ -184,7 +223,6 @@ public class MainLibraryController {
         String album = "Álbum Desconhecido";
         String genero = "Gênero Desconhecido";
         String duracao = "00:00";
-        String ano = "----";
         String caminho = arquivoMp3.getAbsolutePath();
         byte[] capa = null;
 
@@ -198,11 +236,10 @@ public class MainLibraryController {
             long segundos = segundosTotais % 60;
             duracao = String.format("%02d:%02d", minutos, segundos);
 
-            // Verifica se o arquivo possui tags ID3v2 (as mais comuns e modernas)
+            // Tenta ler tags ID3v2 (mais modernas e detalhadas)
             if (mp3File.hasId3v2Tag()) {
                 ID3v2 id3v2Tag = mp3File.getId3v2Tag();
 
-                // Só substitui se o metadado não estiver vazio no arquivo
                 if (id3v2Tag.getTitle() != null && !id3v2Tag.getTitle().isBlank()) {
                     titulo = id3v2Tag.getTitle();
                 }
@@ -215,19 +252,24 @@ public class MainLibraryController {
                 if (id3v2Tag.getGenreDescription() != null && !id3v2Tag.getGenreDescription().isBlank()) {
                     genero = id3v2Tag.getGenreDescription();
                 }
-                if (id3v2Tag.getYear() != null && !id3v2Tag.getYear().isBlank()) {
-                    ano = id3v2Tag.getYear();
-                }
-                // Não carregamos a imagem aqui para evitar OutOfMemory
-                // capa = id3v2Tag.getAlbumImage();
-            } else if (mp3File.hasId3v1Tag()) { // Se não tiver ID3v2, tenta ler o formato antigo ID3v1
+            }
 
+            // Fallback para ID3v1: Se campos importantes ainda forem os padrões, tenta buscar na tag antiga
+            if (mp3File.hasId3v1Tag()) {
                 var id3v1Tag = mp3File.getId3v1Tag();
-                if (id3v1Tag.getTitle() != null && !id3v1Tag.getTitle().isBlank()) titulo = id3v1Tag.getTitle();
-                if (id3v1Tag.getArtist() != null && !id3v1Tag.getArtist().isBlank()) artista = id3v1Tag.getArtist();
-                if (id3v1Tag.getAlbum() != null && !id3v1Tag.getAlbum().isBlank()) album = id3v1Tag.getAlbum();
-                if (id3v1Tag.getGenreDescription() != null && !id3v1Tag.getGenreDescription().isBlank()) genero = id3v1Tag.getGenreDescription();
-                if (id3v1Tag.getYear() != null && !id3v1Tag.getYear().isBlank()) ano = id3v1Tag.getYear();
+
+                if (titulo.equals(arquivoMp3.getName()) && id3v1Tag.getTitle() != null && !id3v1Tag.getTitle().isBlank()) {
+                    titulo = id3v1Tag.getTitle();
+                }
+                if (artista.equals("Artista Desconhecido") && id3v1Tag.getArtist() != null && !id3v1Tag.getArtist().isBlank()) {
+                    artista = id3v1Tag.getArtist();
+                }
+                if (album.equals("Álbum Desconhecido") && id3v1Tag.getAlbum() != null && !id3v1Tag.getAlbum().isBlank()) {
+                    album = id3v1Tag.getAlbum();
+                }
+                if (genero.equals("Gênero Desconhecido") && id3v1Tag.getGenreDescription() != null && !id3v1Tag.getGenreDescription().isBlank()) {
+                    genero = id3v1Tag.getGenreDescription();
+                }
             }
 
         } catch (Exception e) {
@@ -235,7 +277,7 @@ public class MainLibraryController {
             e.printStackTrace();
         }
 
-        return new Musica(titulo, artista, album, genero, duracao, ano, caminho, capa);
+        return new Musica(titulo, artista, album, genero, duracao, caminho, capa);
     }
 
     private void carregarBibliotecaDoJson() {
@@ -530,5 +572,3 @@ public class MainLibraryController {
         }
     }
 }
-
-
