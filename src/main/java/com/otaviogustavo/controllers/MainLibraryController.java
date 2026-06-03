@@ -51,8 +51,6 @@ public class MainLibraryController {
 
     public void definirGerenciador(GerenciadorEstruturas gerenciadorEstruturas) {
         this.gerenciadorEstruturas = gerenciadorEstruturas;
-
-        carregarBibliotecaDoJson();
         atualizarTabelaBiblioteca();
     }
 
@@ -159,8 +157,6 @@ public class MainLibraryController {
     public void abrirJanelaArquivos(ActionEvent actionEvent) {
 
         DirectoryChooser directoryChooser = new DirectoryChooser();
-        List<String> listaCaminhos = new ArrayList<>();
-        LibraryFilePaths libraryData = new LibraryFilePaths();
 
         directoryChooser.setTitle("Selecionar Pasta");
         directoryChooser.setInitialDirectory(new File(System.getProperty("user.home")));
@@ -186,28 +182,11 @@ public class MainLibraryController {
 
                         if (musica != null) {
                             gerenciadorEstruturas.adicionarMusicaBiblioteca(musica);
-                            listaCaminhos.add(file.getAbsolutePath());
                         }
                     }
                 }
                 atualizarTabelaBiblioteca();
-
-                if (listaCaminhos != null) {
-                    libraryData.setListaCaminhos(listaCaminhos);
-
-                    Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-                    // Grava o arquivo de configuração na raiz do projeto
-                    try (FileWriter writer = new FileWriter("LibraryFilePath.json")) {
-                        gson.toJson(libraryData, writer);
-                        System.out.println("Biblioteca salva com sucesso em LibraryFilePath.json!");
-                    } catch (IOException e) {
-                        System.err.println("Erro ao salvar os caminhos no arquivo JSON:" + e.getMessage());
-                        e.printStackTrace();
-                    }
-
-                }
-
+                salvarDadosNoJson();
             }
 
         } else {
@@ -278,42 +257,6 @@ public class MainLibraryController {
         }
 
         return new Musica(titulo, artista, album, genero, duracao, caminho, capa);
-    }
-
-    private void carregarBibliotecaDoJson() {
-        File arquivoJson = new File("LibraryFilePath.json");
-
-        if (!arquivoJson.exists()) {
-            return;
-        }
-
-        Gson gson = new Gson();
-
-        try (FileReader reader = new FileReader(arquivoJson)) {
-
-            // Passa os dados do json para o objeto LibraryData
-            LibraryFilePaths dados = gson.fromJson(reader, LibraryFilePaths.class);
-
-            if (dados != null && dados.getListaCaminhos() != null) {
-
-                for (String caminho : dados.getListaCaminhos()) {
-                    File arquivo = new File(caminho);
-
-                    // verifica se o arquivo existe
-                    if (arquivo.exists() && arquivo.isFile()) {
-                        Musica musica = lerMetadados(arquivo);
-                        if (gerenciadorEstruturas != null) {
-                            gerenciadorEstruturas.adicionarMusicaBiblioteca(musica);
-                        }
-                    }
-                }
-                atualizarTabelaBiblioteca();
-                System.out.println("Biblioteca carregada do JSON!");
-            }
-        } catch (IOException e) {
-            System.err.println("Erro ao carregar o arquivo JSON: " + arquivoJson);
-            e.printStackTrace();
-        }
     }
 
     private void atualizarTabelaBiblioteca() {
@@ -456,32 +399,9 @@ public class MainLibraryController {
     }
 
     public void adicionarMusicaEstruturaEJson(PlayList playlist, Musica musica) {
-
-        try {
-
+        if (gerenciadorEstruturas != null) {
             gerenciadorEstruturas.adicionarMusicaPLaylist(playlist, musica);
-
-            Map<PlayList, List<Musica>> playlistMusica =  gerenciadorEstruturas.getPlaylists();
-
-            if (playlistMusica != null){
-
-                Gson gson = new GsonBuilder().enableComplexMapKeySerialization().setPrettyPrinting().create();
-
-                // Grava o arquivo de configuração na raiz do projeto
-                try (FileWriter writer = new FileWriter("PlayLists.json")) {
-                    gson.toJson(gerenciadorEstruturas, writer);
-
-                    System.out.println("Playlist com musica salva com sucesso em PlayLists.json!");
-
-                } catch (IOException e) {
-                    System.err.println("Erro ao salvar musica no json:" + e.getMessage());
-                    e.printStackTrace();
-                }
-            }
-
-        } catch (Exception e) {
-            System.out.println("Erro ao salvar musica da plalist:" + e.getMessage());
-            e.printStackTrace();
+            salvarDadosNoJson();
         }
     }
 
@@ -546,28 +466,22 @@ public class MainLibraryController {
         if (gerenciadorEstruturas != null) {
             gerenciadorEstruturas.removerMusicaBiblioteca(musica);
             listaMusicas.remove(musica);
-            salvarBibliotecaNoJson();
+            salvarDadosNoJson();
         }
     }
 
-    private void salvarBibliotecaNoJson() {
-        if (gerenciadorEstruturas != null) {
-            List<String> listaCaminhos = new ArrayList<>();
-            for (Musica m : gerenciadorEstruturas.getBibliotecaGeral()) {
-                listaCaminhos.add(m.getCaminho());
-            }
-
-            LibraryFilePaths libraryData = new LibraryFilePaths();
-            libraryData.setListaCaminhos(listaCaminhos);
-
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-            try (FileWriter writer = new FileWriter("LibraryFilePath.json")) {
-                gson.toJson(libraryData, writer);
-                System.out.println("Biblioteca atualizada com sucesso em LibraryFilePath.json!");
+    private void salvarDadosNoJson() {
+        if (mainController != null) {
+            mainController.salvarDadosNoJson();
+        } else {
+            // Fallback caso o mainController não esteja setado
+            try {
+                Gson gson = new GsonBuilder().enableComplexMapKeySerialization().setPrettyPrinting().create();
+                try (FileWriter writer = new FileWriter("BibliotecaEPlaylists.json")) {
+                    gson.toJson(gerenciadorEstruturas, writer);
+                }
             } catch (IOException e) {
-                System.err.println("Erro ao salvar a biblioteca no json: " + e.getMessage());
-                e.printStackTrace();
+                System.err.println("Erro ao salvar dados no json: " + e.getMessage());
             }
         }
     }

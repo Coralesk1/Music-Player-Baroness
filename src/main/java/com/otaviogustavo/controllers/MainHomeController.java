@@ -202,23 +202,21 @@ public class MainHomeController {
     }
 
     public void adicionarMusicaEstruturaEJson(PlayList playlist, Musica musica) {
-        try {
+        if (gerenciadorEstruturas != null) {
             gerenciadorEstruturas.adicionarMusicaPLaylist(playlist, musica);
-            Map<PlayList, List<Musica>> playlistMusica =  gerenciadorEstruturas.getPlaylists();
-
-            if (playlistMusica != null){
-                Gson gson = new GsonBuilder().enableComplexMapKeySerialization().setPrettyPrinting().create();
-                try (FileWriter writer = new FileWriter("PlayLists.json")) {
-                    gson.toJson(gerenciadorEstruturas, writer);
-                    System.out.println("Playlist com musica salva com sucesso em PlayLists.json!");
+            if (mainController != null) {
+                mainController.salvarDadosNoJson();
+            } else {
+                // Fallback
+                try {
+                    Gson gson = new GsonBuilder().enableComplexMapKeySerialization().setPrettyPrinting().create();
+                    try (FileWriter writer = new FileWriter("BibliotecaEPlaylists.json")) {
+                        gson.toJson(gerenciadorEstruturas, writer);
+                    }
                 } catch (IOException e) {
-                    System.err.println("Erro ao salvar musica no json:" + e.getMessage());
-                    e.printStackTrace();
+                    System.err.println("Erro ao salvar dados no json: " + e.getMessage());
                 }
             }
-        } catch (Exception e) {
-            System.out.println("Erro ao salvar musica da plalist:" + e.getMessage());
-            e.printStackTrace();
         }
     }
 }
