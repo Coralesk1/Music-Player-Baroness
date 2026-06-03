@@ -160,7 +160,7 @@ public class MainController {
 
                 gerenciadorEstruturas.adicionaPlaylistVazia(new PlayList(nome, descricao, dtCriacao));
 
-                salvarPlaylistsNoJson();
+                salvarDadosNoJson();
 
                 listPlaylists.getItems().add(nome);
                 listPlaylists.getSelectionModel().select(nome);
@@ -173,34 +173,17 @@ public class MainController {
         }
     }
 
-    private void salvarPlaylistsNoJson() {
+    public void salvarDadosNoJson() {
         if (gerenciadorEstruturas != null) {
             Gson gson = new GsonBuilder().enableComplexMapKeySerialization().setPrettyPrinting().create();
 
             // Grava o arquivo de configuração na raiz do projeto
-            try (FileWriter writer = new FileWriter("PlayLists.json")) {
+            try (FileWriter writer = new FileWriter("BibliotecaEPlaylists.json")) {
                 gson.toJson(gerenciadorEstruturas, writer);
-                System.out.println("Playlists salvas com sucesso em PlayLists.json!");
+                System.out.println("Dados salvos com sucesso em BibliotecaEPlaylists.json!");
 
             } catch (IOException e) {
-                System.err.println("Erro ao salvar playlist no json: " + e.getMessage());
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void salvarHistoricoNoJson() {
-        if (gerenciadorEstruturas != null && gerenciadorEstruturas.getHistoricoReproducao() != null) {
-
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-            try (FileWriter writer = new FileWriter("Historico.json")) {
-
-                gson.toJson(gerenciadorEstruturas.getHistoricoReproducao(), writer);
-                System.out.println("Histórico salvo com sucesso em Historico.json!");
-
-            } catch (IOException e) {
-                System.err.println("Erro ao salvar histórico no json: " + e.getMessage());
+                System.err.println("Erro ao salvar dados no json: " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -211,7 +194,7 @@ public class MainController {
             gerenciadorEstruturas.removerPlaylist(nome);
 
             //atualiza o json depois da remoção da playlist
-            salvarPlaylistsNoJson();
+            salvarDadosNoJson();
             listPlaylists.getItems().remove(nome);
 
 
@@ -318,10 +301,38 @@ public class MainController {
     }
 
     private void reproduzirMusica(Musica musica) {
+
+        File file = new File(musica.getCaminho());
+
+        if (!file.exists()) {
+
+            System.err.println("Arquivo não encontrado no disco (deletado ou movido): " + musica.getCaminho());
+
+            if (gerenciadorEstruturas != null) {
+
+                gerenciadorEstruturas.removerMusicaBiblioteca(musica);
+
+                for (java.util.List<Musica> pList : gerenciadorEstruturas.getPlaylists().values()) {
+                    pList.remove(musica);
+                }
+                gerenciadorEstruturas.getHistoricoReproducao().remove(musica);
+                salvarDadosNoJson();
+            }
+            javafx.application.Platform.runLater(() -> {
+                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
+                alert.setTitle("Música não encontrada");
+                alert.setHeaderText(null);
+                alert.setContentText("O arquivo da música '" + musica.getTitulo() + "' não foi encontrado. Ele será removido da biblioteca.");
+                alert.showAndWait();
+                tocarProximaMusica();
+            });
+            return;
+        }
+
         // Atualiza o histórico
         if (gerenciadorEstruturas != null) {
             gerenciadorEstruturas.adicionarMusicaHistorico(musica);
-            salvarHistoricoNoJson();
+            salvarDadosNoJson();
         }
 
         // Se ja estiver tocando uma musica diferente, para para dar os recursos para outra que for tocar
@@ -332,7 +343,6 @@ public class MainController {
 
         try {
             this.musicaAtual.set(musica);
-            File file = new File(musica.getCaminho());
             Media media = new Media(file.toURI().toString());
             mediaPlayer = new MediaPlayer(media);
 
@@ -445,8 +455,7 @@ public class MainController {
 
     private void carregarView(String fxml) {
 
-        carregarPlaylistsDoJson();
-        carregarHistoricoDoJson();
+        carregarDadosDoJson();
 
         try {
 
@@ -487,31 +496,9 @@ public class MainController {
         }
     }
 
-    private void carregarHistoricoDoJson() {
-        File arquivoJson = new File("Historico.json");
+    private void carregarDadosDoJson(){
 
-        if (!arquivoJson.exists() || gerenciadorEstruturas == null) {
-            return;
-        }
-
-        Gson gson = new Gson();
-
-        try (FileReader reader = new FileReader(arquivoJson)) {
-            java.lang.reflect.Type tipoPilha = new com.google.gson.reflect.TypeToken<java.util.Stack<Musica>>(){}.getType();
-            java.util.Stack<Musica> dados = gson.fromJson(reader, tipoPilha);
-
-            if (dados != null) {
-                gerenciadorEstruturas.setHistoricoReproducao(dados);
-            }
-        } catch (IOException e) {
-            System.err.println("Erro ao carregar o arquivo JSON de Histórico: " + arquivoJson);
-            e.printStackTrace();
-        }
-    }
-
-    private void carregarPlaylistsDoJson(){
-
-        File arquivoJson = new File("PlayLists.json");
+        File arquivoJson = new File("BibliotecaEPlaylists.json");
 
         if (!arquivoJson.exists()) {
             return;
@@ -527,11 +514,59 @@ public class MainController {
                 listPlaylists.getItems().clear();
                 this.gerenciadorEstruturas = dados;
             }
+            limparMusicasDeletadas(true);
             atualizarListaPlaylists();
 
         } catch (IOException e) {
             System.err.println("Erro ao carregar o arquivo JSON: " + arquivoJson);
             e.printStackTrace();
+        }
+    }
+
+    private void limparMusicasDeletadas(boolean salvarJson) {
+        if (gerenciadorEstruturas == null) return;
+        boolean houveAlteracao = false;
+
+        if (gerenciadorEstruturas.getBibliotecaGeral() != null) {
+            java.util.Iterator<Musica> itBib = gerenciadorEstruturas.getBibliotecaGeral().iterator();
+            while (itBib.hasNext()) {
+                Musica m = itBib.next();
+                if (!new File(m.getCaminho()).exists()) {
+                    itBib.remove();
+                    houveAlteracao = true;
+                }
+            }
+        }
+
+        if (gerenciadorEstruturas.getPlaylists() != null) {
+            for (java.util.List<Musica> pList : gerenciadorEstruturas.getPlaylists().values()) {
+                if (pList != null) {
+                    java.util.Iterator<Musica> itPl = pList.iterator();
+                    while (itPl.hasNext()) {
+                        Musica m = itPl.next();
+                        if (!new File(m.getCaminho()).exists()) {
+                            itPl.remove();
+                            houveAlteracao = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (gerenciadorEstruturas.getHistoricoReproducao() != null) {
+            java.util.Iterator<Musica> itHist = gerenciadorEstruturas.getHistoricoReproducao().iterator();
+            while (itHist.hasNext()) {
+                Musica m = itHist.next();
+                if (!new File(m.getCaminho()).exists()) {
+                    itHist.remove();
+                    houveAlteracao = true;
+                }
+            }
+        }
+
+        if (houveAlteracao && salvarJson) {
+            salvarDadosNoJson();
+            System.out.println("Sincronização: Músicas deletadas do disco foram removidas das listas.");
         }
     }
 
@@ -643,8 +678,8 @@ public class MainController {
 
         carregando = true;
         try {
-            // Recarrega as playlists do JSON
-            carregarPlaylistsDoJson();
+            // Recarrega os dados do JSON
+            carregarDadosDoJson();
 
             // Garante que o ListView mantenha o valor selecionado após o recarregamento
             listPlaylists.getSelectionModel().select(nomePlaylist);

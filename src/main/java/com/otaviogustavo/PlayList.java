@@ -8,7 +8,7 @@ public class PlayList {
     private String descricao;
     private String dtCriacao;
 
-    public PlayList() { // construtor vazio por causa do Gson conseguir fazer a deserialização do json
+    public PlayList() { // construtor vazio por causa do Gson conseguir fazer a deserializaÃ§Ã£o do json
     }
 
     public PlayList(String nome, String descricao, String dtCriacao){

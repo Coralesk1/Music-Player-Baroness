@@ -263,23 +263,22 @@ public class MainPlaylistController {
         if (playlist != null && gerenciadorEstruturas != null) {
             gerenciadorEstruturas.removerMusicaPlaylist(playlist, musica);
             listaMusicas.remove(musica);
-            salvarPlaylistsNoJson();
+            salvarDadosNoJson();
         }
     }
 
-    private void salvarPlaylistsNoJson() {
-        if (gerenciadorEstruturas != null) {
-
-            Gson gson = new GsonBuilder().enableComplexMapKeySerialization().setPrettyPrinting().create();
-
-            try (FileWriter writer = new FileWriter("PlayLists.json")) {
-
-                gson.toJson(gerenciadorEstruturas, writer);
-                System.out.println("Playlists salvas com sucesso em PlayLists.json!");
-
+    private void salvarDadosNoJson() {
+        if (mainController != null) {
+            mainController.salvarDadosNoJson();
+        } else {
+            // Fallback
+            try {
+                Gson gson = new GsonBuilder().enableComplexMapKeySerialization().setPrettyPrinting().create();
+                try (FileWriter writer = new FileWriter("BibliotecaEPlaylists.json")) {
+                    gson.toJson(gerenciadorEstruturas, writer);
+                }
             } catch (IOException e) {
                 System.err.println("Erro ao salvar playlist no json: " + e.getMessage());
-                e.printStackTrace();
             }
         }
     }
