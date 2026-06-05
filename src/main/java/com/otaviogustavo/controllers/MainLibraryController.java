@@ -180,7 +180,6 @@ public class MainLibraryController {
         String artista = (comboArtist != null) ? comboArtist.getValue() : null;
         String album = (comboAlbum != null) ? comboAlbum.getValue() : null;
 
-        // 2. Busca na estrutura personalizada (SEM usar FilteredList do JavaFX)
         List<Musica> resultado = gerenciadorEstruturas.buscarMusicaNaBiblioteca(termo, genero, artista, album);
 
         // 3. Aplica a ordenação

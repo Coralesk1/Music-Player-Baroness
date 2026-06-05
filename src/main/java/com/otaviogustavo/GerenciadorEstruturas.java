@@ -64,8 +64,10 @@ public class GerenciadorEstruturas {
     }
 
     public List<Musica> buscarMusicaNaPlaylist(PlayList playlist, String termo, String genero, String artista, String album) {
+
         List<Musica> resultado = new ArrayList<>();
         List<Musica> musicasDaPlaylist = playlists.get(playlist);
+
         if (musicasDaPlaylist == null) return resultado;
 
         String filtroTermo = (termo == null) ? "" : termo.toLowerCase();
@@ -92,6 +94,7 @@ public class GerenciadorEstruturas {
     }
 
     public List<Musica> buscarMusicaNaBiblioteca(String termo, String genero, String artista, String album) {
+
         List<Musica> resultado = new ArrayList<>();
         String filtroTermo = (termo == null) ? "" : termo.toLowerCase();
 
@@ -114,10 +117,6 @@ public class GerenciadorEstruturas {
             }
         }
         return resultado;
-    }
-
-    public List<Musica> buscarMusicaNaBiblioteca(String termo) {
-        return buscarMusicaNaBiblioteca(termo, null, null, null);
     }
 
     public void ordenarLista(List<Musica> lista, String criterio) {
