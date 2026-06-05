@@ -18,10 +18,6 @@ public class GerenciadorEstruturas {
         return historicoReproducao;
     }
 
-    public void setHistoricoReproducao(Stack<Musica> historico) {
-        this.historicoReproducao = historico;
-    }
-
     public void adicionarMusicaHistorico(Musica musica) {
         if (musica == null) return;
 
@@ -67,17 +63,56 @@ public class GerenciadorEstruturas {
         playlists.keySet().removeIf(playlist -> playlist.getNome().equals(nome));
     }
 
-    public List<Musica> buscarMusicaNaBiblioteca(String termo) {
-        if (termo == null || termo.isEmpty()) {
-            return new ArrayList<>(bibliotecaGeral);
-        }
+    public List<Musica> buscarMusicaNaPlaylist(PlayList playlist, String termo, String genero, String artista, String album) {
 
-        String filtro = termo.toLowerCase();
         List<Musica> resultado = new ArrayList<>();
+        List<Musica> musicasDaPlaylist = playlists.get(playlist);
+
+        if (musicasDaPlaylist == null) return resultado;
+
+        String filtroTermo = (termo == null) ? "" : termo.toLowerCase();
+
+        for (Musica musica : musicasDaPlaylist) {
+            boolean matchesTermo = filtroTermo.isEmpty() ||
+                    musica.getTitulo().toLowerCase().contains(filtroTermo) ||
+                    musica.getArtista().toLowerCase().contains(filtroTermo);
+
+            boolean matchesGenre = (genero == null || genero.equals("Todos os gêneros")) ||
+                    (musica.getGenero() != null && musica.getGenero().equalsIgnoreCase(genero));
+
+            boolean matchesArtist = (artista == null || artista.equals("Todos os artistas")) ||
+                    (musica.getArtista() != null && musica.getArtista().equalsIgnoreCase(artista));
+
+            boolean matchesAlbum = (album == null || album.equals("Todos os álbuns")) ||
+                    (musica.getAlbum() != null && musica.getAlbum().equalsIgnoreCase(album));
+
+            if (matchesTermo && matchesGenre && matchesArtist && matchesAlbum) {
+                resultado.add(musica);
+            }
+        }
+        return resultado;
+    }
+
+    public List<Musica> buscarMusicaNaBiblioteca(String termo, String genero, String artista, String album) {
+
+        List<Musica> resultado = new ArrayList<>();
+        String filtroTermo = (termo == null) ? "" : termo.toLowerCase();
 
         for (Musica musica : bibliotecaGeral) {
-            if (musica.getTitulo().toLowerCase().contains(filtro) ||
-                musica.getArtista().toLowerCase().contains(filtro)) {
+            boolean matchesTermo = filtroTermo.isEmpty() ||
+                    musica.getTitulo().toLowerCase().contains(filtroTermo) ||
+                    musica.getArtista().toLowerCase().contains(filtroTermo);
+
+            boolean matchesGenre = (genero == null || genero.equals("Todos os gêneros")) ||
+                    (musica.getGenero() != null && musica.getGenero().equalsIgnoreCase(genero));
+
+            boolean matchesArtist = (artista == null || artista.equals("Todos os artistas")) ||
+                    (musica.getArtista() != null && musica.getArtista().equalsIgnoreCase(artista));
+
+            boolean matchesAlbum = (album == null || album.equals("Todos os álbuns")) ||
+                    (musica.getAlbum() != null && musica.getAlbum().equalsIgnoreCase(album));
+
+            if (matchesTermo && matchesGenre && matchesArtist && matchesAlbum) {
                 resultado.add(musica);
             }
         }

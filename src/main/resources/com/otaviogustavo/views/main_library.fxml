@@ -14,10 +14,38 @@
         <Button fx:id="btnOpenFolder" text="Adicionar pasta" onAction="#abrirJanelaArquivos" styleClass="button-add-folder"/>
     </HBox>
 
-    <HBox alignment="CENTER_LEFT" spacing="10" styleClass="search-container">
-        <FontIcon iconLiteral="ion4-ios-search" iconSize="20" styleClass="search-icon"/>
-        <TextField fx:id="txtBusca" promptText="Buscar músicas pelo nome ou artista..." HBox.hgrow="ALWAYS" styleClass="search-field"/>
-        <ComboBox fx:id="comboOrdenacao" prefWidth="200" styleClass="combo-box-ordenacao"/>
+    <HBox alignment="CENTER_LEFT" spacing="20">
+        <VBox spacing="5" prefWidth="250">
+            <Label text="Buscar" style="-fx-text-fill: #b3b3b3; -fx-font-size: 11px;"/>
+            <HBox alignment="CENTER_LEFT" spacing="10" styleClass="search-container" maxWidth="Infinity">
+                <FontIcon iconLiteral="ion4-ios-search" iconSize="20" styleClass="search-icon"/>
+                <TextField fx:id="txtBusca" promptText="Título ou artista..." styleClass="search-field" HBox.hgrow="ALWAYS"/>
+            </HBox>
+        </VBox>
+
+        <Region HBox.hgrow="ALWAYS" />
+
+        <HBox spacing="15" alignment="BOTTOM_RIGHT">
+            <VBox spacing="5">
+                <Label text="Gênero" style="-fx-text-fill: #b3b3b3; -fx-font-size: 11px;"/>
+                <ComboBox fx:id="comboGenre" prefWidth="150" styleClass="combo-box-ordenacao"/>
+            </VBox>
+
+            <VBox spacing="5">
+                <Label text="Artista" style="-fx-text-fill: #b3b3b3; -fx-font-size: 11px;"/>
+                <ComboBox fx:id="comboArtist" prefWidth="150" styleClass="combo-box-ordenacao"/>
+            </VBox>
+
+            <VBox spacing="5">
+                <Label text="Álbum" style="-fx-text-fill: #b3b3b3; -fx-font-size: 11px;"/>
+                <ComboBox fx:id="comboAlbum" prefWidth="150" styleClass="combo-box-ordenacao"/>
+            </VBox>
+
+            <VBox spacing="5">
+                <Label text="Ordenar por" style="-fx-text-fill: #b3b3b3; -fx-font-size: 11px;"/>
+                <ComboBox fx:id="comboOrdenacao" prefWidth="150" styleClass="combo-box-ordenacao"/>
+            </VBox>
+        </HBox>
     </HBox>
 
     <TableView fx:id="tabelaMusicas" VBox.vgrow="ALWAYS" styleClass="musica-table">
