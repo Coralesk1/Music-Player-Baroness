@@ -3,6 +3,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <VBox xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" spacing="20" fx:controller="com.otaviogustavo.controllers.MainPlaylistController">
     <padding>
@@ -15,11 +16,42 @@
             <Label fx:id="lblPlaylistNome" text="Nome da Playlist" style="-fx-text-fill: white; -fx-font-size: 32px; -fx-font-weight: bold;"/>
             <Label fx:id="lblPlaylistDescricao" text="Descrição da playlist" style="-fx-text-fill: #b3b3b3; -fx-font-size: 14px;"/>
             <Label fx:id="lblPlaylistData" text="Criada em: " style="-fx-text-fill: #727272; -fx-font-size: 12px;"/>
+            <Label fx:id="lblPlaylistQuantidade" text="0 músicas" style="-fx-text-fill: #727272; -fx-font-size: 12px;"/>
         </VBox>
-        <VBox alignment="BOTTOM_RIGHT" spacing="5">
-            <Label text="Ordem personalizada" style="-fx-text-fill: #b3b3b3; -fx-font-size: 12px;"/>
-            <ComboBox fx:id="comboOrdenacao" prefWidth="200" styleClass="combo-box-ordenacao"/>
+    </HBox>
+
+    <HBox alignment="CENTER_LEFT" spacing="20">
+        <VBox spacing="5" prefWidth="250">
+            <Label text="Buscar na playlist" style="-fx-text-fill: #b3b3b3; -fx-font-size: 11px;"/>
+            <HBox alignment="CENTER_LEFT" spacing="10" styleClass="search-container" maxWidth="Infinity">
+                <FontIcon iconLiteral="ion4-ios-search" iconSize="20" styleClass="search-icon"/>
+                <TextField fx:id="txtBusca" promptText="Título ou artista..." styleClass="search-field" HBox.hgrow="ALWAYS"/>
+            </HBox>
         </VBox>
+
+        <Region HBox.hgrow="ALWAYS" />
+
+        <HBox spacing="15" alignment="BOTTOM_RIGHT">
+            <VBox spacing="5">
+                <Label text="Gênero" style="-fx-text-fill: #b3b3b3; -fx-font-size: 11px;"/>
+                <ComboBox fx:id="comboGenre" prefWidth="130" styleClass="combo-box-ordenacao"/>
+            </VBox>
+
+            <VBox spacing="5">
+                <Label text="Artista" style="-fx-text-fill: #b3b3b3; -fx-font-size: 11px;"/>
+                <ComboBox fx:id="comboArtist" prefWidth="130" styleClass="combo-box-ordenacao"/>
+            </VBox>
+
+            <VBox spacing="5">
+                <Label text="Álbum" style="-fx-text-fill: #b3b3b3; -fx-font-size: 11px;"/>
+                <ComboBox fx:id="comboAlbum" prefWidth="130" styleClass="combo-box-ordenacao"/>
+            </VBox>
+
+            <VBox spacing="5">
+                <Label text="Ordenar por" style="-fx-text-fill: #b3b3b3; -fx-font-size: 11px;"/>
+                <ComboBox fx:id="comboOrdenacao" prefWidth="130" styleClass="combo-box-ordenacao"/>
+            </VBox>
+        </HBox>
     </HBox>
 
     <!-- Tabela de Músicas da Playlist -->

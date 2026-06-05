@@ -25,9 +25,11 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 public class MainPlaylistController {
 
@@ -50,6 +52,13 @@ public class MainPlaylistController {
     @FXML private Label lblPlaylistNome;
     @FXML private Label lblPlaylistDescricao;
     @FXML private Label lblPlaylistData;
+    @FXML private Label lblPlaylistQuantidade;
+
+    @FXML private TextField txtBusca;
+    @FXML private ComboBox<String> comboGenre;
+    @FXML private ComboBox<String> comboArtist;
+    @FXML private ComboBox<String> comboAlbum;
+    @FXML private ComboBox<String> comboOrdenacao;
 
     @FXML private TableView<Musica> tabelaMusicas;
     @FXML private TableColumn<Musica, Void> colPlay;
@@ -59,7 +68,6 @@ public class MainPlaylistController {
     @FXML private TableColumn<Musica, String> colDuracao;
     @FXML private TableColumn<Musica, Void> colExcluir;
 
-    @FXML private ComboBox<String> comboOrdenacao;
 
     private ObservableList<Musica> listaMusicas = FXCollections.observableArrayList();
     private Set<Musica> musicasPendentesExclusao = new HashSet<>();
@@ -92,7 +100,18 @@ public class MainPlaylistController {
             configurarColunaExcluir();
 
             tabelaMusicas.setItems(listaMusicas);
+            
+            // Listener para atualizar a contagem de músicas dinamicamente
+            listaMusicas.addListener((javafx.collections.ListChangeListener.Change<? extends Musica> c) -> {
+                atualizarContagemMusicas();
+            });
         }
+
+        // Listeners para filtros
+        if (txtBusca != null) txtBusca.textProperty().addListener((obs, old, newValue) -> atualizarListaComFiltros());
+        if (comboGenre != null) comboGenre.setOnAction(e -> atualizarListaComFiltros());
+        if (comboArtist != null) comboArtist.setOnAction(e -> atualizarListaComFiltros());
+        if (comboAlbum != null) comboAlbum.setOnAction(e -> atualizarListaComFiltros());
 
         if (comboOrdenacao != null) {
             comboOrdenacao.setItems(FXCollections.observableArrayList(
@@ -101,25 +120,54 @@ public class MainPlaylistController {
                     "Ordenar por artista"
             ));
             comboOrdenacao.setValue("Ordem padrão");
-            comboOrdenacao.setOnAction(event -> aplicarOrdenacao());
+            comboOrdenacao.setOnAction(event -> atualizarListaComFiltros());
         }
     }
 
-    private void aplicarOrdenacao() {
-        String opcao = comboOrdenacao.getValue();
-        if (opcao == null) return;
+    private void popularFiltros() {
+        if (gerenciadorEstruturas == null || playlist == null) return;
+        List<Musica> musicasDaPlaylist = gerenciadorEstruturas.getPlaylists().get(playlist);
+        if (musicasDaPlaylist == null) return;
 
-        switch (opcao) {
-            case "Ordenar por nome":
-                listaMusicas.sort((m1, m2) -> m1.getTitulo().compareToIgnoreCase(m2.getTitulo()));
-                break;
-            case "Ordenar por artista":
-                listaMusicas.sort((m1, m2) -> m1.getArtista().compareToIgnoreCase(m2.getArtista()));
-                break;
-            default: // "Ordem padrão"
-                carregarMusicas();
-                break;
+        Set<String> generos = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        Set<String> artistas = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        Set<String> albuns = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+
+        generos.add("Todos os gêneros");
+        artistas.add("Todos os artistas");
+        albuns.add("Todos os álbuns");
+
+        for (Musica m : musicasDaPlaylist) {
+            if (m.getGenero() != null && !m.getGenero().isBlank()) generos.add(m.getGenero());
+            if (m.getArtista() != null && !m.getArtista().isBlank()) artistas.add(m.getArtista());
+            if (m.getAlbum() != null && !m.getAlbum().isBlank()) albuns.add(m.getAlbum());
         }
+
+        comboGenre.setItems(FXCollections.observableArrayList(new ArrayList<>(generos)));
+        comboArtist.setItems(FXCollections.observableArrayList(new ArrayList<>(artistas)));
+        comboAlbum.setItems(FXCollections.observableArrayList(new ArrayList<>(albuns)));
+
+        comboGenre.setValue("Todos os gêneros");
+        comboArtist.setValue("Todos os artistas");
+        comboAlbum.setValue("Todos os álbuns");
+    }
+
+    private void atualizarListaComFiltros() {
+        if (gerenciadorEstruturas == null || playlist == null) return;
+
+        String termo = (txtBusca != null) ? txtBusca.getText() : "";
+        String genero = (comboGenre != null) ? comboGenre.getValue() : null;
+        String artista = (comboArtist != null) ? comboArtist.getValue() : null;
+        String album = (comboAlbum != null) ? comboAlbum.getValue() : null;
+
+        List<Musica> resultado = gerenciadorEstruturas.buscarMusicaNaPlaylist(playlist, termo, genero, artista, album);
+
+        String opcao = (comboOrdenacao != null) ? comboOrdenacao.getValue() : "Ordem padrão";
+        if (opcao != null && !opcao.equals("Ordem padrão")) {
+            gerenciadorEstruturas.ordenarLista(resultado, opcao);
+        }
+
+        listaMusicas.setAll(resultado);
     }
 
     @FXML
@@ -187,17 +235,25 @@ public class MainPlaylistController {
             if (lblPlaylistDescricao != null) lblPlaylistDescricao.setText(playlist.getDescricao());
             if (lblPlaylistData != null) lblPlaylistData.setText("Criada em: " + playlist.getDtCriacao());
 
+            popularFiltros();
             carregarMusicas();
         }
     }
 
     private void carregarMusicas() {
         if (gerenciadorEstruturas != null && playlist != null) {
-            List<Musica> musicas = gerenciadorEstruturas.getPlaylists().get(playlist);
-            if (musicas != null) {
-                listaMusicas.setAll(musicas);
+            atualizarListaComFiltros();
+        }
+        atualizarContagemMusicas();
+    }
+
+    private void atualizarContagemMusicas() {
+        if (lblPlaylistQuantidade != null) {
+            int qtd = listaMusicas.size();
+            if (qtd == 1) {
+                lblPlaylistQuantidade.setText("1 música");
             } else {
-                listaMusicas.clear();
+                lblPlaylistQuantidade.setText(qtd + " músicas");
             }
         }
     }
@@ -262,7 +318,8 @@ public class MainPlaylistController {
     private void removerMusicaEfetivamente(Musica musica) {
         if (playlist != null && gerenciadorEstruturas != null) {
             gerenciadorEstruturas.removerMusicaPlaylist(playlist, musica);
-            listaMusicas.remove(musica);
+            popularFiltros(); // Atualiza os filtros caso o gênero/artista deletado fosse o único
+            atualizarListaComFiltros();
             salvarDadosNoJson();
         }
     }
