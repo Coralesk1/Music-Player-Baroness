@@ -44,6 +44,7 @@ O software foi projetado seguindo princípios de código limpo e modularidade:
 - **Controller**: Controladores especializados gerenciam a interação do usuário e atualizam a interface.
 
 ### 2. Design Patterns
+- **Singleton Pattern**: Garante a existência de uma instância única e global para o gerenciamento de estados centrais da aplicação e controle do player.
 - **Command Pattern**: Utilizado para encapsular as ações de reprodução (`ComandoPlay`, `ComandoProximo`, `ComandoAnterior`), facilitando a manutenção e extensibilidade.
 - **Observer Pattern**: Uso extensivo de `Properties` do JavaFX para atualizar a UI automaticamente quando o estado da música ou do player muda.
 
@@ -67,26 +68,34 @@ O software foi projetado seguindo princípios de código limpo e modularidade:
    mvn clean javafx:run
    ```
 
-3. **Gerar Executável (JAR):**
+3. **Gerar Executável Nativo (.exe):**
    ```bash
    mvn clean package
+   jpackage --type app-image --name BaronessPlayer --input target --main-jar BaronessPlayer.jar --main-class com.otaviogustavo.Main --icon baroness.ico --dest executavel
    ```
+
+> 💡 **Nota para a Avaliação (Professor):** O aplicativo já encontra-se compilado e empacotado de forma autossuficiente para o Windows. Para testar o programa **não é necessário ter o Java instalado**. Basta acessar o diretório `executavel/BaronessPlayer/` e dar um duplo-clique no arquivo `BaronessPlayer.exe`!
+
+> 🎵 **Músicas para Teste:** Para facilitar a correção e experimentação do player, incluímos uma pasta separada no projeto contendo algumas músicas de teste. Sinta-se à vontade para importá-las no player para testar a reprodução, leitura de metadados e capas de álbum!
 
 ---
 
 ## 📁 Estrutura do Projeto
 
 ```text
-src/main/java/com/otaviogustavo/
-├── App.java                   # Classe principal (Entry point)
-├── GerenciadorEstruturas.java # Core da lógica de dados
-├── commands/                  # Implementação do Command Pattern
-├── controllers/               # Controladores da interface JavaFX
-└── ...
-src/main/resources/com/otaviogustavo/
-├── views/                     # Arquivos FXML das telas
-├── css/                       # Estilização da aplicação
-└── images/                    # Ativos visuais e ícones
+baroness-player-java-edition/
+├── executavel/                # Versão final compilada pronta para uso
+│   └── BaronessPlayer/        # Pasta do programa (contém o .exe e a JVM embutida)
+├── src/main/java/com/otaviogustavo/
+│   ├── App.java               # Entry point do JavaFX
+│   ├── Main.java              # Entry point auxiliar para o empacotamento nativo
+│   ├── GerenciadorEstruturas.java # Core da lógica de dados
+│   ├── commands/              # Implementação do Command Pattern
+│   └── controllers/           # Controladores da interface
+└── src/main/resources/com/otaviogustavo/
+    ├── views/                 # Telas da interface (FXML)
+    ├── css/                   # Estilização visual (CSS)
+    └── images/                # Ícones e imagens (ex: baroness.png/ico)
 ```
 
 ---
