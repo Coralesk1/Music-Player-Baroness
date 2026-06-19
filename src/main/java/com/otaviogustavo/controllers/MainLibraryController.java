@@ -430,6 +430,9 @@ public class MainLibraryController {
             gerenciadorEstruturas.removerMusicaBiblioteca(musica);
             popularFiltros(); // atualiza os combo de filtro apos excliur uma musica .
             atualizarListaComFiltros();
+            if (mainController != null) {
+                mainController.removerDaFilaEContexto(musica);
+            }
             salvarDadosNoJson();
         }
     }

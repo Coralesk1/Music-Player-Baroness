@@ -285,6 +285,15 @@ public class MainController {
         reproduzirMusica(musica);
     }
 
+    public void removerDaFilaEContexto(Musica musica) {
+        if (listaContexto != null) {
+            listaContexto.remove(musica);
+        }
+        if (filaReproducao != null) {
+            filaReproducao.remove(musica);
+        }
+    }
+
     private void prepararFila(Musica musicaReferencia) {
         filaReproducao.clear();
         if (listaContexto == null || listaContexto.isEmpty()) return;
@@ -316,6 +325,7 @@ public class MainController {
                     pList.remove(musica);
                 }
                 gerenciadorEstruturas.getHistoricoReproducao().remove(musica);
+                removerDaFilaEContexto(musica);
                 salvarDadosNoJson();
             }
             javafx.application.Platform.runLater(() -> {
