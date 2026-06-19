@@ -90,6 +90,8 @@ public class MainController {
     @FXML private Button btnNext;
     @FXML private Button btnPrevious;
     @FXML private FontIcon iconPlay;
+    @FXML private ToggleButton btnAleatorio;
+    @FXML private FontIcon iconAleatorio;
 
     @FXML private Label lblTitulo;
     @FXML private Label lblArtista;
@@ -294,17 +296,36 @@ public class MainController {
         }
     }
 
+    @FXML
+    private void lidarComAcaoAleatorio(ActionEvent event) {
+        if (btnAleatorio.isSelected()) {
+            iconAleatorio.setStyle("-fx-icon-color: white;");
+        } else {
+            iconAleatorio.setStyle("-fx-icon-color: grey;");
+        }
+        if (musicaAtual.get() != null) {
+            prepararFila(musicaAtual.get());
+        }
+    }
+
     private void prepararFila(Musica musicaReferencia) {
         filaReproducao.clear();
         if (listaContexto == null || listaContexto.isEmpty()) return;
 
-        boolean encontrou = false;
-        for (Musica m : listaContexto) {
-            if (encontrou) {
-                filaReproducao.offer(m);
-            }
-            if (m.equals(musicaReferencia)) {
-                encontrou = true;
+        if (btnAleatorio != null && btnAleatorio.isSelected()) {
+            List<Musica> embaralhada = new java.util.ArrayList<>(listaContexto);
+            embaralhada.remove(musicaReferencia);
+            java.util.Collections.shuffle(embaralhada);
+            filaReproducao.addAll(embaralhada);
+        } else {
+            boolean encontrou = false;
+            for (Musica m : listaContexto) {
+                if (encontrou) {
+                    filaReproducao.offer(m);
+                }
+                if (m.equals(musicaReferencia)) {
+                    encontrou = true;
+                }
             }
         }
     }
