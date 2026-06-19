@@ -320,6 +320,9 @@ public class MainPlaylistController {
             gerenciadorEstruturas.removerMusicaPlaylist(playlist, musica);
             popularFiltros(); // Atualiza os filtros caso o gênero/artista deletado fosse o único
             atualizarListaComFiltros();
+            if (mainController != null) {
+                mainController.removerDaFilaEContexto(musica);
+            }
             salvarDadosNoJson();
         }
     }

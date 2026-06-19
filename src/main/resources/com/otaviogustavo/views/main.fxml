@@ -3,7 +3,6 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.image.*?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
@@ -75,7 +74,14 @@
       </HBox>
 
       <VBox spacing="5" alignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="0">
-        <HBox styleClass="player-controls-container" spacing="10" alignment="CENTER" maxWidth="Infinity">
+        <HBox styleClass="player-controls-container" spacing="15" alignment="CENTER" maxWidth="Infinity">
+          <!-- Botão Aleatório -->
+          <ToggleButton fx:id="btnAleatorio" styleClass="button-player" onAction="#lidarComAcaoAleatorio">
+            <graphic>
+              <FontIcon fx:id="iconAleatorio" iconLiteral="ion4-ios-shuffle" iconSize="20" style="-fx-icon-color: grey;"/>
+            </graphic>
+          </ToggleButton>
+
           <!-- Botão Voltar -->
           <Button fx:id="btnPrevious" styleClass="button-player" onAction="#lidarComAcaoAnterior">
             <graphic>
@@ -94,6 +100,12 @@
               <FontIcon iconLiteral="ion4-ios-skip-forward" iconSize="20"/>
             </graphic>
           </Button>
+
+          <ToggleButton visible="false" styleClass="button-player">
+            <graphic>
+              <FontIcon iconLiteral="ion4-ios-shuffle" iconSize="20"/>
+            </graphic>
+          </ToggleButton>
         </HBox>
         <HBox spacing="10" alignment="CENTER">
           <Label fx:id="lblTempoAtual" text="00:00" style="-fx-text-fill: white; -fx-font-size: 11px;"/>
